@@ -1,11 +1,12 @@
 const jwt = require('jsonwebtoken');
-const secret = "5af6e93f-6423-4bf9-b9ad-ced8df0ce641"; 
+const secret = "5af6e93f-6423-4bf9-b9ad-ced8df0ce641";
 
 const authController = {
+    // Login handler
     login: (req, res) => {
         const { identity, password } = req.body;
 
-        // Replace this with DB/user service lookup
+        // Simulated user database
         const validUsers = [
             {
                 username: 'admin',
@@ -16,6 +17,7 @@ const authController = {
             }
         ];
 
+        // Check if identity (username/email/phone) and password match
         const user = validUsers.find(user =>
             (user.username === identity || user.email === identity || user.phone === identity) &&
             user.password === password
@@ -30,9 +32,10 @@ const authController = {
 
             const token = jwt.sign(tokenPayload, secret, { expiresIn: '1h' });
 
+            // Set token in HTTP-only cookie
             res.cookie('jwtToken', token, {
                 httpOnly: true,
-                secure: false,
+                secure: false, // Set to true if using HTTPS
                 sameSite: 'strict',
                 path: '/'
             });
@@ -47,11 +50,13 @@ const authController = {
         }
     },
 
+    // Logout handler
     logout: (req, res) => {
         res.clearCookie('jwtToken');
         return res.json({ message: "User logged out successfully" });
     },
 
+    // Session verification handler
     isUserLoggedIn: (req, res) => {
         const token = req.cookies.jwtToken;
 
@@ -63,7 +68,7 @@ const authController = {
             if (err) {
                 return res.status(401).json({ message: "Invalid token" });
             }
-            return res.json({ userDetails: decoded });
+            return res.status(200).json({ userDetails: decoded });
         });
     }
 };
