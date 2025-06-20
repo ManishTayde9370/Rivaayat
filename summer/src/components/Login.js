@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
 import SplashScreen from './SplashScreen';
@@ -16,67 +17,44 @@ const Login = ({ updateUserDetails }) => {
 
   const validate = () => {
     const err = {};
-    const emailRegex = /\S+@\S+\.\S+/;
-    const phoneRegex = /^[6-9]\d{9}$/;
-
-    if (!identity) {
-      err.identity = 'This field is required';
-    } else if (
-      !emailRegex.test(identity) &&
-      !phoneRegex.test(identity) &&
-      identity.length < 3
-    ) {
-      err.identity = 'Enter a valid username, email, or phone number';
-    }
-
-    if (!password) {
-      err.password = 'Password is required';
-    } else if (password.length < 6) {
-      err.password = 'Password must be at least 6 characters';
-    }
-
+    if (!identity) err.identity = 'Identity is required';
+    if (!password) err.password = 'Password is required';
     return err;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const formErrors = validate();
     setErrors(formErrors);
+    setMessage('');
 
     if (Object.keys(formErrors).length === 0) {
-      // Dummy user credentials
-      const dummyUser = {
-        username: 'Tejas',
-        email: 'Tejas17@example.com',
-        phone: '9876543210',
-        password: 'Tejas17',
-      };
+      try {
+        const response = await axios.post(
+          'http://localhost:5000/auth/login',
+          { identity, password },
+          { withCredentials: true }
+        );
 
-      const isValidUser =
-        (identity === dummyUser.username ||
-          identity === dummyUser.email ||
-          identity === dummyUser.phone) &&
-        password === dummyUser.password;
-
-      if (isValidUser) {
-        setMessage('');
-        setShowSplash(true);
-        setTimeout(() => {
-          setShowSplash(false);
-          updateUserDetails({ username: identity });
-          navigate('/dashboard');
-        }, 3000);
-      } else {
-        setMessage('Invalid credentials. Please try again.');
+        const data = response.data;
+        if (data.success) {
+          setShowSplash(true);
+          setTimeout(() => {
+            setShowSplash(false);
+            updateUserDetails({ username: data.username });
+            navigate('/dashboard');
+          }, 2000);
+        } else {
+          setMessage(data.message || 'Login failed.');
+        }
+      } catch (err) {
+        console.error('Login error:', err);
+        setMessage(err.response?.data?.message || 'Server error. Try again.');
       }
-    } else {
-      setMessage('');
     }
   };
 
-  if (showSplash) {
-    return <SplashScreen />;
-  }
+  if (showSplash) return <SplashScreen />;
 
   return (
     <div className="container mt-5" style={{ maxWidth: '420px' }}>
@@ -102,11 +80,7 @@ const Login = ({ updateUserDetails }) => {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
             />
-            <span
-              className="input-group-text"
-              style={{ cursor: 'pointer' }}
-              onClick={() => setShowPwd(!showPwd)}
-            >
+            <span className="input-group-text" onClick={() => setShowPwd(!showPwd)} style={{ cursor: 'pointer' }}>
               {showPwd ? <FaEyeSlash /> : <FaEye />}
             </span>
           </div>
