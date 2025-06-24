@@ -1,34 +1,58 @@
-import { Route, Routes } from 'react-router-dom'; 
+import { Route, Routes } from 'react-router-dom';
 import Home from './components/Home';
 import Login from './components/Login';
-import Applayout from './Layout/Applayout';
+import Register from './components/Register';
 import Dashboard from './components/Dashboard';
+import Applayout from './Layout/Applayout';
 import { useState } from 'react';
 
 function App() {
-  // Corrected variable names
   const [userDetails, setUserDetails] = useState(null);
 
   const updateUserDetails = (updateData) => {
     setUserDetails(updateData);
   };
 
+  const handleLogout = () => {
+    setUserDetails(null);
+  };
+
   return (
     <Routes>
-      <Route path="/" element={<Applayout><Home /></Applayout>} />
+      <Route
+        path="/"
+        element={
+          <Applayout userDetails={userDetails} onLogout={handleLogout}>
+            <Home />
+          </Applayout>
+        }
+      />
+
+      <Route
+        path="/register"
+        element={
+          <Applayout userDetails={userDetails} onLogout={handleLogout}>
+            <Register updateUserDetails={updateUserDetails} />
+          </Applayout>
+        }
+      />
 
       <Route
         path="/login"
-        element={<Login updateUserDetails={updateUserDetails} />}
+        element={
+          <Applayout userDetails={userDetails} onLogout={handleLogout}>
+            <Login updateUserDetails={updateUserDetails} />
+          </Applayout>
+        }
       />
 
       <Route
         path="/dashboard"
         element={
-          <Applayout>
+          <Applayout userDetails={userDetails} onLogout={handleLogout}>
             <Dashboard
               userDetails={userDetails}
-              updateUserDetails={setUserDetails}
+              updateUserDetails={updateUserDetails}
             />
           </Applayout>
         }

@@ -1,16 +1,20 @@
-
 import Footer from '../components/Footer';
-import Header from '../components/Header';
-function Applayout({children }) {
-  return (
-  <>
-    <Header/>
-      <div className="container mx-auto mt-10">
-      {children}
-        <Footer />
-      </div>
-      </>
+import NavbarPublic from '../components/NavbarPublic';
+import NavbarPrivate from '../components/NavbarPrivate';
 
+function Applayout({ children, userDetails, onLogout }) {
+  return (
+    <>
+      {userDetails ? (
+        <NavbarPrivate username={userDetails.username} onLogout={onLogout} />
+      ) : (
+        <NavbarPublic />
+      )}
+
+      <div className="container mt-4">{children}</div>
+
+      <Footer />
+    </>
   );
 }
 

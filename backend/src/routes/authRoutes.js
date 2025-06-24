@@ -1,10 +1,12 @@
 const express = require('express');
+const router = express.Router();
 const authController = require('../controller/authController');
 
-const router = express.Router();
 
 router.post('/login', authController.login);
+router.post('/register', authController.register);
+router.post('/google-login', authController.googleLogin); // ✅ New
 router.post('/logout', authController.logout);
-router.post('/is-user-logged-in', authController.isUserLoggedIn);
+router.get('/is-user-logged-in', authController.isUserLoggedIn);
 
 module.exports = router;
