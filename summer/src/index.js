@@ -2,20 +2,23 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
 
-import 'bootstrap/dist/css/bootstrap.min.css';
+import { Provider } from 'react-redux';
 import { BrowserRouter } from 'react-router-dom';
 import { GoogleOAuthProvider } from '@react-oauth/google';
 
-const root = ReactDOM.createRoot(document.getElementById('root'));
+import store from './store';
 
-const clientId = "957337772920-f8ndfht1po7255aq630erb92ofj75cde.apps.googleusercontent.com"; // 🔁 Replace with your real client ID
+const root = ReactDOM.createRoot(document.getElementById('root'));
+const clientId = process.env.REACT_APP_GOOGLE_CLIENT_ID;
 
 root.render(
   <React.StrictMode>
-    <GoogleOAuthProvider clientId={clientId}>
-      <BrowserRouter>
-        <App />
-      </BrowserRouter>
-    </GoogleOAuthProvider>
+    <Provider store={store}>
+      <GoogleOAuthProvider clientId={clientId}>
+        <BrowserRouter>
+          <App />
+        </BrowserRouter>
+      </GoogleOAuthProvider>
+    </Provider>
   </React.StrictMode>
 );

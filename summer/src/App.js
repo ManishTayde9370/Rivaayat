@@ -1,20 +1,18 @@
 import { Route, Routes } from 'react-router-dom';
-import Home from './components/Home';
-import Login from './components/Login';
-import Register from './components/Register';
-import Dashboard from './components/Dashboard';
+import Home from './pages/Home';
+import Login from './pages/Login';
+import Register from './pages/Register';
+import Dashboard from './pages/Dashboard';
 import Applayout from './Layout/Applayout';
-import { useState } from 'react';
+import { useSelector, useDispatch } from 'react-redux';
+import { clearUser } from './redux/user/actions';
 
 function App() {
-  const [userDetails, setUserDetails] = useState(null);
-
-  const updateUserDetails = (updateData) => {
-    setUserDetails(updateData);
-  };
+  const userDetails = useSelector((state) => state.user);
+  const dispatch = useDispatch();
 
   const handleLogout = () => {
-    setUserDetails(null);
+    dispatch(clearUser());
   };
 
   return (
@@ -32,7 +30,7 @@ function App() {
         path="/register"
         element={
           <Applayout userDetails={userDetails} onLogout={handleLogout}>
-            <Register updateUserDetails={updateUserDetails} />
+            <Register />
           </Applayout>
         }
       />
@@ -41,7 +39,7 @@ function App() {
         path="/login"
         element={
           <Applayout userDetails={userDetails} onLogout={handleLogout}>
-            <Login updateUserDetails={updateUserDetails} />
+            <Login />
           </Applayout>
         }
       />
@@ -50,10 +48,7 @@ function App() {
         path="/dashboard"
         element={
           <Applayout userDetails={userDetails} onLogout={handleLogout}>
-            <Dashboard
-              userDetails={userDetails}
-              updateUserDetails={updateUserDetails}
-            />
+            <Dashboard />
           </Applayout>
         }
       />
