@@ -1,28 +1,33 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import 'bootstrap/dist/css/bootstrap.min.css';
-import { FaEye, FaEyeSlash, FaUserAlt, FaLock } from 'react-icons/fa';
-import SplashScreen from '../components/SplashScreen';
-import bgImage from '../assets/bg-login1.jpeg';
+import { useNavigate, Link } from 'react-router-dom';
 import { GoogleLogin } from '@react-oauth/google';
 import { jwtDecode } from 'jwt-decode';
-import { serverEndpoint } from '../components/config';
-
-// ✅ Redux imports
 import { useDispatch } from 'react-redux';
-import { SET_USER } from '../redux/user/actions'; // ✅ using action constant
+import { motion } from 'framer-motion';
+import { toast, ToastContainer } from 'react-toastify';
+
+import { FaUserAlt, FaLock, FaEye, FaEyeSlash } from 'react-icons/fa';
+
+import 'bootstrap/dist/css/bootstrap.min.css';
+import 'react-toastify/dist/ReactToastify.css';
+import '../css/login.css'; // Make sure it includes shared background styling
+
+import bgImage from '../assets/bg-login1.jpeg';
+import SplashScreen from '../components/SplashScreen';
+import { serverEndpoint } from '../components/config';
+import { SET_USER } from '../redux/user/actions';
 
 const Login = () => {
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+
   const [identity, setIdentity] = useState('');
   const [password, setPassword] = useState('');
   const [showPwd, setShowPwd] = useState(false);
-  const [message, setMessage] = useState('');
   const [errors, setErrors] = useState({});
+  const [message, setMessage] = useState('');
   const [showSplash, setShowSplash] = useState(false);
-
-  const navigate = useNavigate();
-  const dispatch = useDispatch();
 
   const validate = () => {
     const err = {};
@@ -54,8 +59,7 @@ const Login = () => {
                 `${serverEndpoint}/api/auth/is-user-logged-in`,
                 { withCredentials: true }
               );
-
-              dispatch({ type: SET_USER, payload: userRes.data.userDetails }); // ✅ Redux best practice
+              dispatch({ type: SET_USER, payload: userRes.data.userDetails });
               setShowSplash(false);
               navigate('/dashboard');
             } catch (err) {
@@ -94,7 +98,7 @@ const Login = () => {
           `${serverEndpoint}/api/auth/is-user-logged-in`,
           { withCredentials: true }
         );
-        dispatch({ type: SET_USER, payload: userRes.data.userDetails }); // ✅ Redux best practice
+        dispatch({ type: SET_USER, payload: userRes.data.userDetails });
         navigate('/dashboard');
       } else {
         setMessage(data.message || 'Google login failed.');
@@ -114,92 +118,78 @@ const Login = () => {
   if (showSplash) return <SplashScreen />;
 
   return (
-    <div
-      style={{
-        backgroundImage: `url(${bgImage})`,
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-        backgroundRepeat: 'no-repeat',
-        minHeight: '100vh',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: '1rem',
-      }}
-    >
-      <div
-        className="p-4 shadow-lg rounded"
-        style={{
-          width: '100%',
-          maxWidth: '420px',
-          backgroundColor: 'rgba(0, 0, 0, 0.65)',
-          color: '#fcecc5',
-          border: '1px solid #fcecc5',
-          borderRadius: '15px',
-        }}
+    <div className="login-page" style={{ backgroundImage: `url(${bgImage})` }}>
+      <div className="login-overlay"></div>
+      <ToastContainer />
+
+      <motion.div
+        initial={{ y: 40, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ duration: 0.7 }}
+        className="login-card"
       >
-        <h2 className="text-center mb-1" style={{ fontFamily: 'Georgia', fontWeight: 'bold' }}>
-          RIVAAYAT
-        </h2>
-        <p className="text-center mb-4" style={{ letterSpacing: '1px' }}>
-          LOGIN
-        </p>
+        <h2 className="login-heading">Login</h2>
+        <p className="login-subheading">Sign in to your account</p>
 
         <form onSubmit={handleSubmit}>
-          <div className="form-group mb-3">
-            <label className="mb-1">Username / Email / Phone</label>
-            <div className="input-group">
-              <span className="input-group-text bg-transparent border-light text-light">
-                <FaUserAlt />
-              </span>
-              <input
-                type="text"
-                className={`form-control bg-transparent border-light text-light ${errors.identity ? 'is-invalid' : ''}`}
-                value={identity}
-                onChange={(e) => setIdentity(e.target.value)}
-              />
-            </div>
-            {errors.identity && <div className="text-danger small mt-1">{errors.identity}</div>}
+          <div className="mb-3 input-group">
+            <span className="input-group-text"><FaUserAlt /></span>
+            <input
+              type="text"
+              name="identity"
+              placeholder="Username / Email / Phone"
+              className={`form-control ${errors.identity ? 'is-invalid' : ''}`}
+              value={identity}
+              onChange={(e) => setIdentity(e.target.value)}
+            />
+          </div>
+          {errors.identity && <div className="text-danger small mb-2">{errors.identity}</div>}
+
+          <div className="mb-3 input-group">
+            <span className="input-group-text"><FaLock /></span>
+            <input
+              type={showPwd ? 'text' : 'password'}
+              name="password"
+              placeholder="Password"
+              className={`form-control ${errors.password ? 'is-invalid' : ''}`}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
+            <span className="input-group-text" onClick={() => setShowPwd(!showPwd)} style={{ cursor: 'pointer' }}>
+              {showPwd ? <FaEyeSlash /> : <FaEye />}
+            </span>
+          </div>
+          {errors.password && <div className="text-danger small mb-2">{errors.password}</div>}
+
+          <button type="submit" className="btn login-btn w-100">Login</button>
+
+{/* OR Divider */}
+<div className="text-center my-3" style={{ color: '#fcecc5', fontWeight: 'bold', position: 'relative' }}>
+  <hr style={{ borderColor: '#fcecc5' }} />
+  <span style={{
+    backgroundColor: 'rgba(0, 0, 0, 0.65)',
+    padding: '0 10px',
+    position: 'absolute',
+    top: '-13px',
+    left: '50%',
+    transform: 'translateX(-50%)',
+  }}>or</span>
+</div>
+
+{/* Google Login */}
+<div className="d-flex justify-content-center mb-2">
+  <GoogleLogin onSuccess={handleGoogleSuccess} onError={handleGoogleFailure} />
+</div>
+
+
+          <div className="mt-3 text-center">
+            <span>Don't have an account? </span>
+            <Link to="/register" className="register-link">Register</Link>
           </div>
 
-          <div className="form-group mb-4">
-            <label className="mb-1">Password</label>
-            <div className="input-group">
-              <span className="input-group-text bg-transparent border-light text-light">
-                <FaLock />
-              </span>
-              <input
-                type={showPwd ? 'text' : 'password'}
-                className={`form-control bg-transparent border-light text-light ${errors.password ? 'is-invalid' : ''}`}
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-              />
-              <span
-                className="input-group-text bg-transparent border-light text-light"
-                onClick={() => setShowPwd(!showPwd)}
-                style={{ cursor: 'pointer' }}
-              >
-                {showPwd ? <FaEyeSlash /> : <FaEye />}
-              </span>
-            </div>
-            {errors.password && <div className="text-danger small mt-1">{errors.password}</div>}
-          </div>
-
-          <button
-            type="submit"
-            className="btn w-100 mb-3"
-            style={{ backgroundColor: '#fcecc5', color: '#000', fontWeight: 'bold' }}
-          >
-            LOGIN
-          </button>
+          {message && <div className="alert alert-danger mt-3">{message}</div>}
         </form>
-
-        <div className="d-flex justify-content-center mb-2">
-          <GoogleLogin onSuccess={handleGoogleSuccess} onError={handleGoogleFailure} />
-        </div>
-
-        {message && <div className="alert alert-danger mt-3">{message}</div>}
-      </div>
+      </motion.div>
     </div>
   );
 };

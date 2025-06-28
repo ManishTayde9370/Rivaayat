@@ -1,9 +1,13 @@
 import { Route, Routes } from 'react-router-dom';
-import Home from './pages/Home';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
+import Contact from './pages/Contact';
+import About from './pages/About';
+import HomePublic from './pages/HomePublic';
+import HomePrivate from './pages/HomePrivate';
 import Applayout from './Layout/Applayout';
+
 import { useSelector, useDispatch } from 'react-redux';
 import { CLEAR_USER } from './redux/user/actions';
 
@@ -21,7 +25,7 @@ function App() {
         path="/"
         element={
           <Applayout userDetails={userDetails} onLogout={handleLogout}>
-            <Home />
+            {userDetails ? <HomePrivate /> : <HomePublic />}
           </Applayout>
         }
       />
@@ -49,6 +53,24 @@ function App() {
         element={
           <Applayout userDetails={userDetails} onLogout={handleLogout}>
             <Dashboard />
+          </Applayout>
+        }
+      />
+
+      <Route
+        path="/contact"
+        element={
+          <Applayout userDetails={userDetails} onLogout={handleLogout}>
+            <Contact />
+          </Applayout>
+        }
+      />
+
+      <Route
+        path="/about"
+        element={
+          <Applayout userDetails={userDetails} onLogout={handleLogout}>
+            <About />
           </Applayout>
         }
       />
