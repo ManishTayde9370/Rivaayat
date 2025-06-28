@@ -1,7 +1,8 @@
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
-const User = require('../model/Users');
 const { OAuth2Client } = require('google-auth-library');
+const { validationResult } = require('express-validator'); // ✅ Added
+const User = require('../model/Users');
 
 const secret = process.env.JWT_SECRET || "5af6e93f-6423-4bf9-b9ad-ced8df0ce641";
 const googleClientId = process.env.GOOGLE_CLIENT_ID;
@@ -36,21 +37,35 @@ const authController = {
       });
 
       await newUser.save();
-      return res.status(201).json({ success: true, message: "User registered successfully" });
 
+      return res.status(201).json({ success: true, message: "User registered successfully" });
     } catch (error) {
       console.error("❌ Register error:", error);
       return res.status(500).json({ success: false, message: "Server error" });
     }
   },
 
-  // 🔐 Login
+  // 🔐 Login with validation
   login: async (req, res) => {
+    // ✅ Validate request
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(422).json({
+        success: false,
+        message: "Validation failed",
+        errors: errors.array()
+      });
+    }
+
     const { identity, password } = req.body;
 
     try {
       const user = await User.findOne({
-        $or: [{ username: identity }, { email: identity }, { phone: identity }]
+        $or: [
+          { username: identity },
+          { email: identity },
+          { phone: identity }
+        ]
       });
 
       if (!user) {
@@ -94,7 +109,7 @@ const authController = {
     }
   },
 
-  // 🔐 Google Login (Fixed)
+  // 🔐 Google Login
   googleLogin: async (req, res) => {
     const { credential } = req.body;
 
@@ -112,20 +127,19 @@ const authController = {
       });
 
       const payload = ticket.getPayload();
-      const { email, name, sub: googleId } = payload;
+      const { email, name } = payload;
 
       let user = await User.findOne({ email });
 
       if (!user) {
-        const generatedUsername = email.split('@')[0] + Math.floor(Math.random() * 10000);
+        const generatedUsername = `${email.split('@')[0]}${Math.floor(Math.random() * 10000)}`;
         user = new User({
           username: generatedUsername,
           email,
           name,
-          password: '', // not used for Google login
+          password: '',
           isGoogleUser: true
         });
-
         await user.save();
       }
 
@@ -157,21 +171,20 @@ const authController = {
     }
   },
 
- // 🚪 Logout
-logout: (req, res) => {
-  res.clearCookie('token', {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: process.env.NODE_ENV === 'production' ? 'Lax' : 'None',
-    path: '/',
-  });
+  // 🚪 Logout
+  logout: (req, res) => {
+    res.clearCookie(cookieName, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: process.env.NODE_ENV === 'production' ? 'Lax' : 'None',
+      path: '/'
+    });
 
-  return res.status(200).json({
-    success: true,
-    message: 'User logged out successfully',
-  });
-},
-
+    return res.status(200).json({
+      success: true,
+      message: 'User logged out successfully'
+    });
+  },
 
   // 🧠 Session Checker
   isUserLoggedIn: (req, res) => {

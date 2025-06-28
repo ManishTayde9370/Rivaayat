@@ -11,7 +11,7 @@ import { serverEndpoint } from '../components/config';
 
 // ✅ Redux imports
 import { useDispatch } from 'react-redux';
-import { setUser } from '../redux/user/actions';
+import { SET_USER } from '../redux/user/actions'; // ✅ using action constant
 
 const Login = () => {
   const [identity, setIdentity] = useState('');
@@ -22,7 +22,7 @@ const Login = () => {
   const [showSplash, setShowSplash] = useState(false);
 
   const navigate = useNavigate();
-  const dispatch = useDispatch(); // ✅ initialize dispatch
+  const dispatch = useDispatch();
 
   const validate = () => {
     const err = {};
@@ -54,7 +54,8 @@ const Login = () => {
                 `${serverEndpoint}/api/auth/is-user-logged-in`,
                 { withCredentials: true }
               );
-              dispatch(setUser(userRes.data.userDetails)); // ✅ Redux update
+
+              dispatch({ type: SET_USER, payload: userRes.data.userDetails }); // ✅ Redux best practice
               setShowSplash(false);
               navigate('/dashboard');
             } catch (err) {
@@ -93,7 +94,7 @@ const Login = () => {
           `${serverEndpoint}/api/auth/is-user-logged-in`,
           { withCredentials: true }
         );
-        dispatch(setUser(userRes.data.userDetails)); // ✅ Redux update
+        dispatch({ type: SET_USER, payload: userRes.data.userDetails }); // ✅ Redux best practice
         navigate('/dashboard');
       } else {
         setMessage(data.message || 'Google login failed.');

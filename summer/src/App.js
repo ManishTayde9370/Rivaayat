@@ -5,14 +5,14 @@ import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
 import Applayout from './Layout/Applayout';
 import { useSelector, useDispatch } from 'react-redux';
-import { clearUser } from './redux/user/actions';
+import { CLEAR_USER } from './redux/user/actions';
 
 function App() {
   const userDetails = useSelector((state) => state.user);
   const dispatch = useDispatch();
 
   const handleLogout = () => {
-    dispatch(clearUser());
+    dispatch({ type: CLEAR_USER });
   };
 
   return (

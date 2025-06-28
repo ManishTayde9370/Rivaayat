@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { useDispatch, useSelector } from 'react-redux';
 import { serverEndpoint } from '../components/config';
-import { setUser, clearUser } from '../redux/user/actions';
+import { SET_USER, CLEAR_USER } from '../redux/user/actions'; // use action constants
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -19,14 +19,14 @@ const Dashboard = () => {
         });
 
         if (res.data.userDetails) {
-          dispatch(setUser(res.data.userDetails));
+          dispatch({ type: SET_USER, payload: res.data.userDetails }); // dispatch object
         } else {
-          dispatch(clearUser());
+          dispatch({ type: CLEAR_USER });
           navigate('/login');
         }
       } catch (error) {
         console.error('Not logged in or token expired:', error);
-        dispatch(clearUser());
+        dispatch({ type: CLEAR_USER });
         navigate('/login');
       } finally {
         setLoading(false);
@@ -34,7 +34,7 @@ const Dashboard = () => {
     };
 
     if (!userDetails || !userDetails.username) {
-      fetchUser(); // fetch if not already available
+      fetchUser();
     } else {
       setLoading(false);
     }
@@ -49,7 +49,7 @@ const Dashboard = () => {
       );
 
       if (response.data.success) {
-        dispatch(clearUser());
+        dispatch({ type: CLEAR_USER });
         navigate('/login');
       } else {
         console.error('Unexpected logout response:', response.data);
