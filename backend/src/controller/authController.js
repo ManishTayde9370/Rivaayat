@@ -4,7 +4,8 @@ const { OAuth2Client } = require('google-auth-library');
 const { validationResult } = require('express-validator'); // ✅ Added
 const User = require('../model/Users');
 
-const secret = process.env.JWT_SECRET || "5af6e93f-6423-4bf9-b9ad-ced8df0ce641";
+const secret = process.env.JWT_SECRET || "fallback-secret";
+
 const googleClientId = process.env.GOOGLE_CLIENT_ID;
 const saltRounds = 10;
 const cookieName = 'token';
@@ -12,8 +13,18 @@ const cookieName = 'token';
 const client = new OAuth2Client(googleClientId);
 
 const authController = {
-  // 🔐 Register
+  // 🔐 Register with validation
   register: async (req, res) => {
+    // ✅ Validate request
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(422).json({
+        success: false,
+        message: "Validation failed",
+        errors: errors.array()
+      });
+    }
+
     const { username, email, phone, password, name } = req.body;
 
     try {
@@ -47,7 +58,6 @@ const authController = {
 
   // 🔐 Login with validation
   login: async (req, res) => {
-    // ✅ Validate request
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       return res.status(422).json({
