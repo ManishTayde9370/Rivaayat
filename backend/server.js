@@ -6,7 +6,7 @@ const cors = require('cors');
 
 // ✅ Route imports
 const authRoutes = require('./src/routes/authRoutes');
-const linksRoutes = require('./src/routes/linksRoutes'); // ✅ Affiliate links
+
 
 const app = express();
 
@@ -33,7 +33,7 @@ mongoose
 
 // ✅ Register API Routes
 app.use('/api/auth', authRoutes);
-app.use('/api/links', linksRoutes); // ✅ Affiliate Links API
+
 
 // ✅ Start the Server
 const PORT = process.env.PORT || 5000;

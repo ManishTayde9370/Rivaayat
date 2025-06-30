@@ -28,6 +28,7 @@ const NavbarPrivate = ({ username, onLogout }) => {
           <Nav className="me-auto align-items-center gap-3">
             <Nav.Link as={Link} to="/">Home</Nav.Link>
             <Nav.Link as={Link} to="/about">About</Nav.Link>
+            <Nav.Link as={Link} to="/product">Product</Nav.Link>
             <Nav.Link as={Link} to="/contact">Contact</Nav.Link>
             <Nav.Link as={Link} to="/dashboard">Dashboard</Nav.Link>
           </Nav>

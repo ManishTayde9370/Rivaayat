@@ -11,7 +11,7 @@ function Applayout({ children, userDetails, onLogout }) {
         <NavbarPublic />
       )}
 
-      <div className="container mt-4">{children}</div>
+      {children}
 
       <Footer />
     </>

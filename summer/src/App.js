@@ -1,4 +1,7 @@
-import { Route, Routes } from 'react-router-dom';
+import { Route, Routes, Navigate } from 'react-router-dom';
+import { useSelector, useDispatch } from 'react-redux';
+import { CLEAR_USER } from './redux/user/actions';
+
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
@@ -6,10 +9,9 @@ import Contact from './pages/Contact';
 import About from './pages/About';
 import HomePublic from './pages/HomePublic';
 import HomePrivate from './pages/HomePrivate';
+import AdminDashboard from './admin/AdminDashboard';
+import Product from './pages/Product';
 import Applayout from './Layout/Applayout';
-
-import { useSelector, useDispatch } from 'react-redux';
-import { CLEAR_USER } from './redux/user/actions';
 
 function App() {
   const userDetails = useSelector((state) => state.user);
@@ -19,17 +21,22 @@ function App() {
     dispatch({ type: CLEAR_USER });
   };
 
+  const isLoggedIn = !!userDetails;
+  const isAdmin = userDetails?.isAdmin;
+
   return (
     <Routes>
+      {/* Home Route */}
       <Route
         path="/"
         element={
           <Applayout userDetails={userDetails} onLogout={handleLogout}>
-            {userDetails ? <HomePrivate /> : <HomePublic />}
+            {isAdmin ? <AdminDashboard /> : isLoggedIn ? <HomePrivate /> : <HomePublic />}
           </Applayout>
         }
       />
 
+      {/* Public Routes */}
       <Route
         path="/register"
         element={
@@ -38,7 +45,6 @@ function App() {
           </Applayout>
         }
       />
-
       <Route
         path="/login"
         element={
@@ -48,15 +54,27 @@ function App() {
         }
       />
 
+      {/* User Protected Routes */}
       <Route
         path="/dashboard"
         element={
+          isLoggedIn ? (
+            <Applayout userDetails={userDetails} onLogout={handleLogout}>
+              <Dashboard />
+            </Applayout>
+          ) : (
+            <Navigate to="/login" replace />
+          )
+        }
+      />
+      <Route
+        path="/product"
+        element={
           <Applayout userDetails={userDetails} onLogout={handleLogout}>
-            <Dashboard />
+            <Product />
           </Applayout>
         }
       />
-
       <Route
         path="/contact"
         element={
@@ -65,13 +83,26 @@ function App() {
           </Applayout>
         }
       />
-
       <Route
         path="/about"
         element={
           <Applayout userDetails={userDetails} onLogout={handleLogout}>
             <About />
           </Applayout>
+        }
+      />
+
+      {/* Admin Route Protection */}
+      <Route
+        path="/admin"
+        element={
+          isAdmin ? (
+            <Applayout userDetails={userDetails} onLogout={handleLogout}>
+              <AdminDashboard />
+            </Applayout>
+          ) : (
+            <Navigate to="/" replace />
+          )
         }
       />
     </Routes>

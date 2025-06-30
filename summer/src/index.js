@@ -11,6 +11,10 @@ import store from './store';
 const root = ReactDOM.createRoot(document.getElementById('root'));
 const clientId = process.env.REACT_APP_GOOGLE_CLIENT_ID;
 
+if (!clientId) {
+  console.error('❌ Google Client ID not found. Set REACT_APP_GOOGLE_CLIENT_ID in your .env file.');
+}
+
 root.render(
   <React.StrictMode>
     <Provider store={store}>

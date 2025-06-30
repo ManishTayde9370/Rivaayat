@@ -11,9 +11,9 @@ import { FaUserAlt, FaLock, FaEye, FaEyeSlash } from 'react-icons/fa';
 
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'react-toastify/dist/ReactToastify.css';
-import '../css/login.css'; // Make sure it includes shared background styling
+import '../css/login.css';
 
-import bgImage from '../assets/bg-login1.jpeg';
+import bgImage from '../assets/bg-login2.jpeg';
 import SplashScreen from '../components/SplashScreen';
 import { serverEndpoint } from '../components/config';
 import { SET_USER } from '../redux/user/actions';
@@ -52,22 +52,29 @@ const Login = () => {
 
         if (response.data.success) {
           setShowSplash(true);
-
           setTimeout(async () => {
             try {
               const userRes = await axios.get(
                 `${serverEndpoint}/api/auth/is-user-logged-in`,
                 { withCredentials: true }
               );
-              dispatch({ type: SET_USER, payload: userRes.data.userDetails });
+
+              const user = userRes.data.userDetails;
+              dispatch({ type: SET_USER, payload: user });
               setShowSplash(false);
-              navigate('/dashboard');
+
+              // ✅ Redirect based on user role
+              if (user.role === 'admin' || user.isAdmin) {
+                navigate('/admin-dashboard');
+              } else {
+                navigate('/dashboard');
+              }
             } catch (err) {
               console.error('User check error:', err);
               setShowSplash(false);
               setMessage('Could not fetch user info.');
             }
-          }, 2000);
+          }, 1500);
         } else {
           setMessage(response.data.message || 'Login failed.');
         }
@@ -79,8 +86,7 @@ const Login = () => {
   };
 
   const handleGoogleSuccess = async (credentialResponse) => {
-    const googleCredentialFromClient = credentialResponse.credential;
-    const decoded = jwtDecode(googleCredentialFromClient);
+    const googleCredential = credentialResponse.credential;
     setShowSplash(true);
 
     try {
@@ -88,7 +94,7 @@ const Login = () => {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
-        body: JSON.stringify({ credential: googleCredentialFromClient }),
+        body: JSON.stringify({ credential: googleCredential }),
       });
 
       const data = await res.json();
@@ -98,8 +104,14 @@ const Login = () => {
           `${serverEndpoint}/api/auth/is-user-logged-in`,
           { withCredentials: true }
         );
-        dispatch({ type: SET_USER, payload: userRes.data.userDetails });
-        navigate('/dashboard');
+        const user = userRes.data.userDetails;
+        dispatch({ type: SET_USER, payload: user });
+
+        if (user.role === 'admin' || user.isAdmin) {
+          navigate('/admin-dashboard');
+        } else {
+          navigate('/dashboard');
+        }
       } else {
         setMessage(data.message || 'Google login failed.');
       }
@@ -155,7 +167,11 @@ const Login = () => {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
             />
-            <span className="input-group-text" onClick={() => setShowPwd(!showPwd)} style={{ cursor: 'pointer' }}>
+            <span
+              className="input-group-text"
+              onClick={() => setShowPwd(!showPwd)}
+              style={{ cursor: 'pointer' }}
+            >
               {showPwd ? <FaEyeSlash /> : <FaEye />}
             </span>
           </div>
@@ -163,24 +179,21 @@ const Login = () => {
 
           <button type="submit" className="btn login-btn w-100">Login</button>
 
-{/* OR Divider */}
-<div className="text-center my-3" style={{ color: '#fcecc5', fontWeight: 'bold', position: 'relative' }}>
-  <hr style={{ borderColor: '#fcecc5' }} />
-  <span style={{
-    backgroundColor: 'rgba(0, 0, 0, 0.65)',
-    padding: '0 10px',
-    position: 'absolute',
-    top: '-13px',
-    left: '50%',
-    transform: 'translateX(-50%)',
-  }}>or</span>
-</div>
+          <div className="text-center my-3" style={{ color: '#fcecc5', fontWeight: 'bold', position: 'relative' }}>
+            <hr style={{ borderColor: '#fcecc5' }} />
+            <span style={{
+              backgroundColor: 'rgba(0, 0, 0, 0.65)',
+              padding: '0 10px',
+              position: 'absolute',
+              top: '-13px',
+              left: '50%',
+              transform: 'translateX(-50%)',
+            }}>or</span>
+          </div>
 
-{/* Google Login */}
-<div className="d-flex justify-content-center mb-2">
-  <GoogleLogin onSuccess={handleGoogleSuccess} onError={handleGoogleFailure} />
-</div>
-
+          <div className="d-flex justify-content-center mb-2">
+            <GoogleLogin onSuccess={handleGoogleSuccess} onError={handleGoogleFailure} />
+          </div>
 
           <div className="mt-3 text-center">
             <span>Don't have an account? </span>
