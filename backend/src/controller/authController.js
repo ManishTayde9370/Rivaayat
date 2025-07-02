@@ -94,7 +94,8 @@ const authController = {
       const payload = {
         username: user.username,
         name: user.name,
-        email: user.email
+        email: user.email,
+        isAdmin: user.isAdmin
       };
 
       const token = jwt.sign(payload, secret, { expiresIn: '1h' });

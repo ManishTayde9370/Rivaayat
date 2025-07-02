@@ -4,7 +4,7 @@ const secret = process.env.JWT_SECRET || 'your-fallback-secret';
 const cookieName = 'token';
 
 const authMiddleware = {
-  // ✅ Middleware to protect private routes
+  // ✅ Middleware: Require any authenticated user
   requireAuth: (req, res, next) => {
     const token = req.cookies?.[cookieName];
 
@@ -13,31 +13,52 @@ const authMiddleware = {
     }
 
     try {
-      const decoded = jwt.verify(token, secret); // 🔐 Verifies JWT token
-      req.user = decoded; // Attach decoded payload to request for downstream use
-      next(); // Pass control to the next middleware
+      const decoded = jwt.verify(token, secret);
+      req.user = decoded;
+      next();
     } catch (error) {
-      console.error("JWT verification failed:", error.message);
+      console.error('JWT verification failed:', error.message);
       return res.status(401).json({ success: false, message: 'Invalid or expired token' });
     }
   },
 
-  // ✅ Optional middleware to attach user if token exists (but not required)
-  optionalAuth: (req, res, next) => {
+  // ✅ Middleware: Require admin user only
+  requireAdmin: (req, res, next) => {
     const token = req.cookies?.[cookieName];
 
     if (!token) {
-      return next(); // Token not required, proceed
+      return res.status(401).json({ success: false, message: 'Unauthorized: Token missing' });
     }
 
     try {
       const decoded = jwt.verify(token, secret);
-      req.user = decoded; // Attach user if valid token
+
+      if (!decoded.isAdmin) {
+        return res.status(403).json({ success: false, message: 'Access denied: Admins only' });
+      }
+
+      req.user = decoded;
+      next();
     } catch (error) {
-      // Ignore token errors for optional auth
+      console.error('JWT verification failed:', error.message);
+      return res.status(401).json({ success: false, message: 'Invalid or expired token' });
+    }
+  },
+
+  // ✅ Middleware: Optional auth attach (non-blocking)
+  optionalAuth: (req, res, next) => {
+    const token = req.cookies?.[cookieName];
+
+    if (token) {
+      try {
+        const decoded = jwt.verify(token, secret);
+        req.user = decoded;
+      } catch (error) {
+        // Don't block route, just ignore invalid token
+      }
     }
 
-    next(); // Continue regardless
+    next();
   }
 };
 

@@ -1,3 +1,4 @@
+// src/pages/Login.js
 import React, { useState } from 'react';
 import axios from 'axios';
 import { useNavigate, Link } from 'react-router-dom';
@@ -62,13 +63,7 @@ const Login = () => {
               const user = userRes.data.userDetails;
               dispatch({ type: SET_USER, payload: user });
               setShowSplash(false);
-
-              // ✅ Redirect based on user role
-              if (user.role === 'admin' || user.isAdmin) {
-                navigate('/admin-dashboard');
-              } else {
-                navigate('/dashboard');
-              }
+              navigate('/dashboard'); // ✅ Always go to dashboard (no admin condition)
             } catch (err) {
               console.error('User check error:', err);
               setShowSplash(false);
@@ -106,12 +101,7 @@ const Login = () => {
         );
         const user = userRes.data.userDetails;
         dispatch({ type: SET_USER, payload: user });
-
-        if (user.role === 'admin' || user.isAdmin) {
-          navigate('/admin-dashboard');
-        } else {
-          navigate('/dashboard');
-        }
+        navigate('/dashboard'); // ✅ Always to user dashboard
       } else {
         setMessage(data.message || 'Google login failed.');
       }

@@ -1,48 +1,29 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import axios from 'axios';
 import Zoom from 'react-medium-image-zoom';
 import 'react-medium-image-zoom/dist/styles.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 
-const products = [
-  {
-    id: 1,
-    name: 'Handcrafted Royal Saree',
-    description: 'Pure silk saree with intricate zari work reflecting heritage.',
-    images: [
-      '/uploads/products/saree1-front.jpg',
-      '/uploads/products/saree2-front.jpg',
-      '/uploads/products/saree3-front.jpg',
-      '/uploads/products/saree4-front.jpg',
-    ],
-    price: '₹8,499',
-  },
-  {
-    id: 2,
-    name: 'Antique Brass Lamp',
-    description: 'Traditional brass diya lamp for decor and rituals.',
-    images: [
-      '/uploads/products/lamp1.jpg',
-      '/uploads/products/lamp2.jpg',
-      '/uploads/products/lamp3.jpg',
-      '/uploads/products/lamp4.jpg',
-    ],
-    price: '₹1,299',
-  },
-  {
-    id: 3,
-    name: 'Wooden Carved Jewelry Box',
-    description: 'Hand-carved box to store your precious belongings.',
-    images: [
-      '/uploads/products/woodbox1.jpg',
-      '/uploads/products/woodbox2.jpg',
-      '/uploads/products/woodbox3.jpg',
-    ],
-    price: '₹999',
-  },
-];
-
 const Product = () => {
+  const [products, setProducts] = useState([]);
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+      const res = await axios.get('http://localhost:5000/api/products'
+, {
+          withCredentials: true,
+        });
+        setProducts(res.data.products || []);
+      } catch (err) {
+        console.error('Error fetching products:', err);
+      }
+    };
+
+    fetchProducts();
+  }, []);
+
   return (
     <div className="container py-5">
       <h2 className="text-center mb-5" style={{ fontFamily: 'Georgia', fontWeight: 'bold', color: '#4b2e2e' }}>
@@ -50,8 +31,8 @@ const Product = () => {
       </h2>
 
       <div className="row justify-content-center">
-        {products.map((product) => (
-          <ProductCard key={product.id} product={product} />
+        {products.map((product, i) => (
+          <ProductCard key={i} product={product} />
         ))}
       </div>
     </div>
@@ -104,7 +85,7 @@ const ProductCard = ({ product }) => {
         <div className="card-body text-center">
           <h5 className="card-title" style={{ color: '#3e1f1f', fontWeight: 'bold' }}>{product.name}</h5>
           <p className="card-text text-muted">{product.description}</p>
-          <h6 className="mb-3" style={{ color: '#7b3f00', fontWeight: 'bold' }}>{product.price}</h6>
+          <h6 className="mb-3" style={{ color: '#7b3f00', fontWeight: 'bold' }}>₹{product.price}</h6>
           <button className="btn btn-outline-dark rounded-pill px-4">Add to Cart</button>
         </div>
       </div>

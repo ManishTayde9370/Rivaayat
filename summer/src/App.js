@@ -9,9 +9,16 @@ import Contact from './pages/Contact';
 import About from './pages/About';
 import HomePublic from './pages/HomePublic';
 import HomePrivate from './pages/HomePrivate';
-import AdminDashboard from './admin/AdminDashboard';
 import Product from './pages/Product';
+
+import AdminLogin from './admin/AdminLogin';
+import AdminDashboard from './admin/AdminDashboard';
+import ManageProducts from './admin/ManageProducts';
+// import ManageUsers from './admin/ManageUsers'; // ✅ create if not yet
+import AddProduct from './admin/AddProduct'; // ✅ create if not yet
+
 import Applayout from './Layout/Applayout';
+import AdminLayout from './Layout/AdminLayout';
 
 function App() {
   const userDetails = useSelector((state) => state.user);
@@ -26,17 +33,25 @@ function App() {
 
   return (
     <Routes>
-      {/* Home Route */}
+      {/* ✅ Home Route */}
       <Route
         path="/"
         element={
           <Applayout userDetails={userDetails} onLogout={handleLogout}>
-            {isAdmin ? <AdminDashboard /> : isLoggedIn ? <HomePrivate /> : <HomePublic />}
+            {isLoggedIn && !isAdmin ? <HomePrivate /> : <HomePublic />}
           </Applayout>
         }
       />
 
-      {/* Public Routes */}
+      {/* ✅ Public Routes */}
+      <Route
+        path="/login"
+        element={
+          <Applayout userDetails={userDetails} onLogout={handleLogout}>
+            <Login />
+          </Applayout>
+        }
+      />
       <Route
         path="/register"
         element={
@@ -46,19 +61,15 @@ function App() {
         }
       />
       <Route
-        path="/login"
-        element={
-          <Applayout userDetails={userDetails} onLogout={handleLogout}>
-            <Login />
-          </Applayout>
-        }
+        path="/adminlogin"
+        element={<AdminLogin />}
       />
 
-      {/* User Protected Routes */}
+      {/* ✅ User Dashboard (Protected) */}
       <Route
         path="/dashboard"
         element={
-          isLoggedIn ? (
+          isLoggedIn && !isAdmin ? (
             <Applayout userDetails={userDetails} onLogout={handleLogout}>
               <Dashboard />
             </Applayout>
@@ -67,19 +78,67 @@ function App() {
           )
         }
       />
+
+      {/* ✅ Admin Routes (Protected) */}
+      <Route
+        path="/admin"
+        element={
+          isAdmin ? (
+            <AdminLayout userDetails={userDetails} onLogout={handleLogout}>
+              <AdminDashboard />
+            </AdminLayout>
+          ) : (
+            <Navigate to="/adminlogin" replace />
+          )
+        }
+      />
+
+      {/* <Route
+        path="/admin/users"
+        element={
+          isAdmin ? (
+            <AdminLayout userDetails={userDetails} onLogout={handleLogout}>
+              <ManageUsers />
+            </AdminLayout>
+          ) : (
+            <Navigate to="/adminlogin" replace />
+          )
+        }
+      /> */}
+
+      <Route
+  path="/admin/products/add"
+  element={
+    isAdmin ? (
+      <AdminLayout userDetails={userDetails} onLogout={handleLogout}>
+        <AddProduct />
+      </AdminLayout>
+    ) : (
+      <Navigate to="/adminlogin" replace />
+    )
+  }
+/>
+
+
+      <Route
+        path="/admin/products"
+        element={
+          isAdmin ? (
+            <AdminLayout userDetails={userDetails} onLogout={handleLogout}>
+              <ManageProducts />
+            </AdminLayout>
+          ) : (
+            <Navigate to="/adminlogin" replace />
+          )
+        }
+      />
+
+      {/* ✅ Public Pages */}
       <Route
         path="/product"
         element={
           <Applayout userDetails={userDetails} onLogout={handleLogout}>
             <Product />
-          </Applayout>
-        }
-      />
-      <Route
-        path="/contact"
-        element={
-          <Applayout userDetails={userDetails} onLogout={handleLogout}>
-            <Contact />
           </Applayout>
         }
       />
@@ -91,18 +150,12 @@ function App() {
           </Applayout>
         }
       />
-
-      {/* Admin Route Protection */}
       <Route
-        path="/admin"
+        path="/contact"
         element={
-          isAdmin ? (
-            <Applayout userDetails={userDetails} onLogout={handleLogout}>
-              <AdminDashboard />
-            </Applayout>
-          ) : (
-            <Navigate to="/" replace />
-          )
+          <Applayout userDetails={userDetails} onLogout={handleLogout}>
+            <Contact />
+          </Applayout>
         }
       />
     </Routes>

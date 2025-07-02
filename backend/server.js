@@ -3,14 +3,17 @@ const express = require('express');
 const mongoose = require('mongoose');
 const cookieParser = require('cookie-parser');
 const cors = require('cors');
+const path = require('path');
 
-// ✅ Route imports
-const authRoutes = require('./src/routes/authRoutes');
+const authRoutes = require('./src/routes/authRoutes');         // 👤 Public/Auth/User
+const adminRoutes = require('./src/routes/adminRoutes');       // 🔐 Admin-protected routes
+const adminProductRoutes = require('./src/routes/adminProductRoutes'); // 📦 Product CRUD
+const publicProductRoutes = require('./src/routes/publicProductRoutes');
 
 
 const app = express();
 
-// ✅ CORS Configuration
+// ✅ Enable CORS for frontend
 app.use(
   cors({
     origin: process.env.CLIENT_ENDPOINT || 'http://localhost:3000',
@@ -18,7 +21,7 @@ app.use(
   })
 );
 
-// ✅ Middleware for parsing JSON and cookies
+// ✅ Parse incoming requests
 app.use(express.json());
 app.use(cookieParser());
 
@@ -31,11 +34,23 @@ mongoose
   .then(() => console.log('✅ MongoDB connected successfully'))
   .catch((err) => console.error('❌ MongoDB connection error:', err));
 
-// ✅ Register API Routes
+// ✅ Serve uploaded images statically
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
+// ✅ API Routes
 app.use('/api/auth', authRoutes);
+app.use('/api/admin', adminRoutes);
+app.use('/api/admin/products', adminProductRoutes); // ➕ Products CRUD
+// ✅ Public Product Routes (no auth needed)
+app.use('/api/products', publicProductRoutes);
 
 
-// ✅ Start the Server
+// ✅ Root
+app.get('/', (req, res) => {
+  res.send('🌿 Rivaayat Server is running');
+});
+
+// ✅ Start Server
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`🚀 Server running at: http://localhost:${PORT}`);

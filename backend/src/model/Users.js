@@ -19,13 +19,12 @@ const userSchema = new mongoose.Schema({
     type: String,
     trim: true,
     unique: true,
-    sparse: true // Allows multiple users with no phone (null/undefined)
+    sparse: true // Allows duplicates if not provided (null/undefined)
   },
   password: {
     type: String,
-    // Password is required only if the user is NOT logging in via Google
     required: function () {
-      return !this.isGoogleUser;
+      return !this.isGoogleUser; // Only required for non-Google users
     }
   },
   name: {
@@ -36,13 +35,14 @@ const userSchema = new mongoose.Schema({
   isGoogleUser: {
     type: Boolean,
     default: false
+  },
+  isAdmin: {
+    type: Boolean,
+    default: false // Normal users are not admins
   }
 }, {
-  timestamps: true // Automatically adds createdAt and updatedAt
+  timestamps: true // Adds createdAt and updatedAt automatically
 });
 
-// Create the User model from schema
-const User = mongoose.model('User', userSchema);
-
-// Export the model
-module.exports = User;
+// Create and export the User model
+module.exports = mongoose.model('User', userSchema);
