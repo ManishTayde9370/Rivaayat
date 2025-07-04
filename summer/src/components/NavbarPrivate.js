@@ -54,9 +54,7 @@ const NavbarPrivate = ({ username, onLogout }) => {
           {/* Right section - Greeting & Logout */}
           <div className="d-flex align-items-center gap-3">
             <span className="text-dark">👋 Hello, <strong>{username}</strong></span>
-            <Button variant="outline-danger" size="sm" onClick={onLogout}>
-              Logout
-            </Button>
+            
           </div>
         </Navbar.Collapse>
       </Container>

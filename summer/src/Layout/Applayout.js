@@ -3,16 +3,18 @@ import NavbarPublic from '../components/NavbarPublic';
 import NavbarPrivate from '../components/NavbarPrivate';
 
 function Applayout({ children, userDetails, onLogout }) {
+  const isLoggedIn = !!userDetails?.email;
+  const isAdmin = userDetails?.isAdmin;
+
   return (
     <>
-      {userDetails ? (
+      {isLoggedIn && !isAdmin ? (
         <NavbarPrivate username={userDetails.username} onLogout={onLogout} />
       ) : (
         <NavbarPublic />
       )}
 
       {children}
-
       <Footer />
     </>
   );

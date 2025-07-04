@@ -4,15 +4,19 @@ import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { toast, ToastContainer } from 'react-toastify';
-import { SET_USER } from '../redux/user/actions'; // ✅ Ensure this is the correct path
+import { SET_USER } from '../redux/user/actions';
+
+import { FaUserAlt, FaLock } from 'react-icons/fa';
 import 'react-toastify/dist/ReactToastify.css';
+import 'bootstrap/dist/css/bootstrap.min.css';
+import '../css/royal-login.css';
 
 const AdminLogin = () => {
   const [identity, setIdentity] = useState('');
   const [password, setPassword] = useState('');
   const [errors, setErrors] = useState({});
   const navigate = useNavigate();
-  const dispatch = useDispatch(); // ✅ Redux dispatch
+  const dispatch = useDispatch();
 
   const validate = () => {
     const err = {};
@@ -28,14 +32,12 @@ const AdminLogin = () => {
     if (Object.keys(formErrors).length > 0) return;
 
     try {
-      // Step 1: Login request
       const res = await axios.post(
         'http://localhost:5000/api/auth/login',
         { identity, password },
         { withCredentials: true }
       );
 
-      // Step 2: Get user session
       const userRes = await axios.get(
         'http://localhost:5000/api/auth/is-user-logged-in',
         { withCredentials: true }
@@ -43,12 +45,11 @@ const AdminLogin = () => {
 
       const user = userRes.data.userDetails;
 
-      // Step 3: Check if user is admin
       if (user?.isAdmin) {
-        dispatch({ type: SET_USER, payload: user }); // ✅ Save to Redux
+        dispatch({ type: SET_USER, payload: user });
         toast.success('Admin login successful');
         setTimeout(() => {
-          navigate('/admin', { replace: true }); // ✅ Match the route in App.js
+          navigate('/admin', { replace: true });
         }, 1000);
       } else {
         toast.error('You are not authorized as admin');
@@ -59,34 +60,46 @@ const AdminLogin = () => {
   };
 
   return (
-    <div className="container mt-5" style={{ maxWidth: '400px' }}>
+    <div className="royal-bg d-flex align-items-center justify-content-center min-vh-100">
       <ToastContainer />
-      <h2 className="mb-4 text-center">Admin Login</h2>
-      <form onSubmit={handleSubmit}>
-        <div className="mb-3">
-          <label>Username / Email</label>
-          <input
-            type="text"
-            className="form-control"
-            value={identity}
-            onChange={(e) => setIdentity(e.target.value)}
-          />
-          {errors.identity && <div className="text-danger">{errors.identity}</div>}
-        </div>
+      <div className="royal-card p-4 rounded shadow-lg text-center">
+        <h2 className="mb-3 royal-title">🔐 Admin Login</h2>
+        <p className="text-white mb-4">Sign in to manage the Rivaayat platform</p>
 
-        <div className="mb-3">
-          <label>Password</label>
-          <input
-            type="password"
-            className="form-control"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-          />
-          {errors.password && <div className="text-danger">{errors.password}</div>}
-        </div>
+        <form onSubmit={handleSubmit}>
+          {/* Username */}
+          <div className="mb-3 input-group">
+            <span className="input-group-text"><FaUserAlt /></span>
+            <input
+              type="text"
+              name="identity"
+              placeholder="Username / Email"
+              className={`form-control ${errors.identity ? 'is-invalid' : ''}`}
+              value={identity}
+              onChange={(e) => setIdentity(e.target.value)}
+            />
+          </div>
+          {errors.identity && <div className="text-danger small mb-2">{errors.identity}</div>}
 
-        <button type="submit" className="btn btn-dark w-100">Login as Admin</button>
-      </form>
+          {/* Password */}
+          <div className="mb-3 input-group">
+            <span className="input-group-text"><FaLock /></span>
+            <input
+              type="password"
+              name="password"
+              placeholder="Password"
+              className={`form-control ${errors.password ? 'is-invalid' : ''}`}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
+          </div>
+          {errors.password && <div className="text-danger small mb-3">{errors.password}</div>}
+
+          <button type="submit" className="btn btn-dark w-100 fw-bold shadow">
+            👑 Login as Admin
+          </button>
+        </form>
+      </div>
     </div>
   );
 };

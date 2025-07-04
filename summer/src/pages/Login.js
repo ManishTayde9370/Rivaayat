@@ -3,10 +3,10 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import { useNavigate, Link } from 'react-router-dom';
 import { GoogleLogin } from '@react-oauth/google';
-import { jwtDecode } from 'jwt-decode';
+
 import { useDispatch } from 'react-redux';
 import { motion } from 'framer-motion';
-import { toast, ToastContainer } from 'react-toastify';
+import {  ToastContainer } from 'react-toastify';
 
 import { FaUserAlt, FaLock, FaEye, FaEyeSlash } from 'react-icons/fa';
 
