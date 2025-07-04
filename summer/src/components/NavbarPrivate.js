@@ -1,9 +1,11 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Navbar, Nav, Container, Button, Form, FormControl } from 'react-bootstrap';
+import { Navbar, Nav, Container, Form, FormControl } from 'react-bootstrap';
 import { FaSearch } from 'react-icons/fa';
 import logo from '../assets/brandlogo.png';
 import '../css/NavbarPrivate.css';
+import CartIcon from './CartIcon';
+
 
 const NavbarPrivate = ({ username, onLogout }) => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -31,6 +33,7 @@ const NavbarPrivate = ({ username, onLogout }) => {
             <Nav.Link as={Link} to="/product">Product</Nav.Link>
             <Nav.Link as={Link} to="/contact">Contact</Nav.Link>
             <Nav.Link as={Link} to="/dashboard">Dashboard</Nav.Link>
+            
           </Nav>
 
           {/* Middle section - Search */}
@@ -54,7 +57,7 @@ const NavbarPrivate = ({ username, onLogout }) => {
           {/* Right section - Greeting & Logout */}
           <div className="d-flex align-items-center gap-3">
             <span className="text-dark">👋 Hello, <strong>{username}</strong></span>
-            
+            <CartIcon />
           </div>
         </Navbar.Collapse>
       </Container>

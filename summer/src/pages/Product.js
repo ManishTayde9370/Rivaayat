@@ -5,14 +5,16 @@ import 'react-medium-image-zoom/dist/styles.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 
+import { useDispatch } from 'react-redux';
+import { addToCart } from '../redux/cart/actions';
+
 const Product = () => {
   const [products, setProducts] = useState([]);
 
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-      const res = await axios.get('http://localhost:5000/api/products'
-, {
+        const res = await axios.get('http://localhost:5000/api/products', {
           withCredentials: true,
         });
         setProducts(res.data.products || []);
@@ -32,7 +34,7 @@ const Product = () => {
 
       <div className="row justify-content-center">
         {products.map((product, i) => (
-          <ProductCard key={i} product={product} />
+          <ProductCard key={product._id || i} product={product} />
         ))}
       </div>
     </div>
@@ -40,7 +42,12 @@ const Product = () => {
 };
 
 const ProductCard = ({ product }) => {
+  const dispatch = useDispatch();
   const [activeIndex, setActiveIndex] = useState(0);
+
+  const handleAddToCart = () => {
+    dispatch(addToCart(product));
+  };
 
   return (
     <div className="col-md-4 mb-4">
@@ -49,7 +56,7 @@ const ProductCard = ({ product }) => {
           <Zoom>
             <img
               src={product.images[activeIndex]}
-              alt={`${product.name} main`}
+              alt={product.name}
               className="img-fluid rounded"
               style={{
                 height: '250px',
@@ -61,14 +68,13 @@ const ProductCard = ({ product }) => {
           </Zoom>
         </div>
 
-        {/* Thumbnails */}
         <div className="d-flex justify-content-center mb-2 flex-wrap px-2">
           {product.images.map((img, index) => (
             <img
               key={index}
               src={img}
-              onClick={() => setActiveIndex(index)}
               alt={`thumb-${index}`}
+              onClick={() => setActiveIndex(index)}
               className={`m-1 border ${index === activeIndex ? 'border-warning' : 'border-light'}`}
               style={{
                 width: '50px',
@@ -86,7 +92,9 @@ const ProductCard = ({ product }) => {
           <h5 className="card-title" style={{ color: '#3e1f1f', fontWeight: 'bold' }}>{product.name}</h5>
           <p className="card-text text-muted">{product.description}</p>
           <h6 className="mb-3" style={{ color: '#7b3f00', fontWeight: 'bold' }}>₹{product.price}</h6>
-          <button className="btn btn-outline-dark rounded-pill px-4">Add to Cart</button>
+          <button className="btn btn-outline-dark rounded-pill px-4" onClick={handleAddToCart}>
+            Add to Cart
+          </button>
         </div>
       </div>
     </div>

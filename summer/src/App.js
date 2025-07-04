@@ -2,7 +2,6 @@ import { Route, Routes, Navigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import { useEffect, useState } from 'react';
 import axios from 'axios';
-import { SET_USER, CLEAR_USER } from './redux/user/actions';
 
 import Applayout from './Layout/Applayout';
 import AdminLayout from './Layout/AdminLayout';
@@ -15,6 +14,7 @@ import About from './pages/About';
 import HomePublic from './pages/HomePublic';
 import HomePrivate from './pages/HomePrivate';
 import Product from './pages/Product';
+import CartPage from './pages/CartPage';
 
 import AdminLogin from './admin/AdminLogin';
 import AdminDashboard from './admin/AdminDashboard';
@@ -22,6 +22,8 @@ import ManageProducts from './admin/ManageProducts';
 import AddProduct from './admin/AddProduct';
 
 import { serverEndpoint } from './components/config';
+import { SET_USER, CLEAR_USER } from './redux/user/actions';
+import { loadCartFromBackend, clearCart } from './redux/cart/actions';
 
 function App() {
   const [sessionChecked, setSessionChecked] = useState(false);
@@ -35,13 +37,16 @@ function App() {
           withCredentials: true,
         });
 
-        if (res.data.success) {
+        if (res.data.success && res.data.userDetails) {
           dispatch({ type: SET_USER, payload: res.data.userDetails });
+          dispatch(loadCartFromBackend());
         } else {
           dispatch({ type: CLEAR_USER });
+          dispatch(clearCart());
         }
       } catch (err) {
         dispatch({ type: CLEAR_USER });
+        dispatch(clearCart());
       } finally {
         setSessionChecked(true);
       }
@@ -52,13 +57,14 @@ function App() {
 
   const handleLogout = () => {
     dispatch({ type: CLEAR_USER });
+    dispatch(clearCart());
   };
 
   const isLoggedIn = !!userDetails?.email;
   const isAdmin = userDetails?.isAdmin;
 
   if (!sessionChecked) {
-    return <div>Loading...</div>; // Can replace with a spinner
+    return <div>Loading...</div>; // Or a custom spinner
   }
 
   return (
@@ -124,6 +130,14 @@ function App() {
         element={
           <Applayout userDetails={userDetails} onLogout={handleLogout}>
             <Contact />
+          </Applayout>
+        }
+      />
+      <Route
+        path="/cart"
+        element={
+          <Applayout userDetails={userDetails} onLogout={handleLogout}>
+            <CartPage />
           </Applayout>
         }
       />
