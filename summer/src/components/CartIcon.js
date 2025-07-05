@@ -1,23 +1,23 @@
 import { useSelector } from 'react-redux';
-import { useNavigate } from 'react-router-dom'; // ✅ For navigation
-import '../css/CartIcon.css'; // ✅ Import your CSS for styling
+import { useNavigate } from 'react-router-dom';
+import '../css/CartIcon.css';
 
 const CartIcon = () => {
   const items = useSelector(state => state.cart.items);
-  const navigate = useNavigate(); // ✅ Hook from react-router-dom
+  const navigate = useNavigate();
 
   const totalQuantity = Array.isArray(items)
     ? items.reduce((sum, item) => sum + item.quantity, 0)
     : 0;
 
   const handleClick = () => {
-    navigate('/cart'); // ✅ Navigate to the cart page
+    navigate('/cart');
   };
 
   return (
     <div className="cart-icon" onClick={handleClick} style={{ cursor: 'pointer' }}>
       🛒
-      <span>{totalQuantity}</span>
+      {totalQuantity > 0 && <span className="cart-count">{totalQuantity}</span>}
     </div>
   );
 };

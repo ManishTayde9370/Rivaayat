@@ -53,4 +53,3 @@ export const persistCartToBackend = () => async (dispatch, getState) => {
     console.error('Error saving cart to backend:', err);
   }
 };
-

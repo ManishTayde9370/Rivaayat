@@ -27,7 +27,6 @@ import { fetchCartFromBackend, clearCart } from './redux/cart/actions';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
-
 function App() {
   const [sessionChecked, setSessionChecked] = useState(false);
   const userDetails = useSelector((state) => state.user);
@@ -58,7 +57,8 @@ function App() {
     restoreSession();
   }, [dispatch]);
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    await axios.post(`${serverEndpoint}/api/auth/logout`, {}, { withCredentials: true });
     dispatch({ type: CLEAR_USER });
     dispatch(clearCart());
   };
@@ -75,34 +75,60 @@ function App() {
       <Routes>
         <Route
           path="/"
+          element={<Navigate to={isLoggedIn && !isAdmin ? "/homeprivate" : "/homepublic"} replace />}
+        />
+
+        <Route
+          path="/homepublic"
           element={
-            <Applayout userDetails={userDetails} onLogout={handleLogout}>
-              {isLoggedIn && !isAdmin ? <HomePrivate /> : <HomePublic />}
+            <Applayout userDetails={userDetails} onLogout={handleLogout} sessionChecked={sessionChecked}>
+              <HomePublic />
             </Applayout>
           }
         />
+
+        <Route
+          path="/homeprivate"
+          element={
+            isLoggedIn && !isAdmin ? (
+              <Applayout userDetails={userDetails} onLogout={handleLogout} sessionChecked={sessionChecked}>
+                <HomePrivate />
+              </Applayout>
+            ) : (
+              <Navigate to="/login" replace />
+            )
+          }
+        />
+
         <Route
           path="/login"
           element={
-            <Applayout userDetails={userDetails} onLogout={handleLogout}>
-              <Login />
-            </Applayout>
+            isLoggedIn ? (
+              <Navigate to={isAdmin ? "/admin" : "/homeprivate"} replace />
+            ) : (
+              <Applayout userDetails={userDetails} onLogout={handleLogout} sessionChecked={sessionChecked}>
+                <Login />
+              </Applayout>
+            )
           }
         />
+
         <Route
           path="/register"
           element={
-            <Applayout userDetails={userDetails} onLogout={handleLogout}>
+            <Applayout userDetails={userDetails} onLogout={handleLogout} sessionChecked={sessionChecked}>
               <Register />
             </Applayout>
           }
         />
+
         <Route path="/adminlogin" element={<AdminLogin />} />
+
         <Route
           path="/dashboard"
           element={
             isLoggedIn && !isAdmin ? (
-              <Applayout userDetails={userDetails} onLogout={handleLogout}>
+              <Applayout userDetails={userDetails} onLogout={handleLogout} sessionChecked={sessionChecked}>
                 <Dashboard />
               </Applayout>
             ) : (
@@ -110,10 +136,11 @@ function App() {
             )
           }
         />
+
         <Route
           path="/product"
           element={
-            <Applayout userDetails={userDetails} onLogout={handleLogout}>
+            <Applayout userDetails={userDetails} onLogout={handleLogout} sessionChecked={sessionChecked}>
               <Product />
             </Applayout>
           }
@@ -121,7 +148,7 @@ function App() {
         <Route
           path="/about"
           element={
-            <Applayout userDetails={userDetails} onLogout={handleLogout}>
+            <Applayout userDetails={userDetails} onLogout={handleLogout} sessionChecked={sessionChecked}>
               <About />
             </Applayout>
           }
@@ -129,7 +156,7 @@ function App() {
         <Route
           path="/contact"
           element={
-            <Applayout userDetails={userDetails} onLogout={handleLogout}>
+            <Applayout userDetails={userDetails} onLogout={handleLogout} sessionChecked={sessionChecked}>
               <Contact />
             </Applayout>
           }
@@ -137,11 +164,12 @@ function App() {
         <Route
           path="/cart"
           element={
-            <Applayout userDetails={userDetails} onLogout={handleLogout}>
+            <Applayout userDetails={userDetails} onLogout={handleLogout} sessionChecked={sessionChecked}>
               <CartPage />
             </Applayout>
           }
         />
+
         <Route
           path="/admin"
           element={
@@ -154,6 +182,7 @@ function App() {
             )
           }
         />
+
         <Route
           path="/admin/products"
           element={
@@ -166,6 +195,7 @@ function App() {
             )
           }
         />
+
         <Route
           path="/admin/products/add"
           element={
@@ -180,7 +210,6 @@ function App() {
         />
       </Routes>
 
-      {/* ✅ ToastContainer should be rendered here */}
       <ToastContainer position="top-right" autoClose={3000} />
     </>
   );

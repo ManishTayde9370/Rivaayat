@@ -1,8 +1,9 @@
 import Footer from '../components/Footer';
 import NavbarPublic from '../components/NavbarPublic';
 import NavbarPrivate from '../components/NavbarPrivate';
+function Applayout({ children, userDetails, onLogout, sessionChecked }) {
+  if (!sessionChecked) return null;
 
-function Applayout({ children, userDetails, onLogout }) {
   const isLoggedIn = !!userDetails?.email;
   const isAdmin = userDetails?.isAdmin;
 
@@ -13,11 +14,11 @@ function Applayout({ children, userDetails, onLogout }) {
       ) : (
         <NavbarPublic />
       )}
-
       {children}
       <Footer />
     </>
   );
 }
+
 
 export default Applayout;

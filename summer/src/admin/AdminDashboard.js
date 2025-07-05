@@ -3,12 +3,12 @@ import React from 'react';
 import { Container, Row, Col, Card, Button } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 import '../css/admin-dashboard.css';
-import AdminNavbar from './AdminNavbar';
+
 
 const AdminDashboard = () => {
   return (
     <>
-      {/* <AdminNavbar /> */}
+    
 
       <Container fluid className="dashboard-bg text-center py-5 min-vh-100">
         <Row className="justify-content-center mb-5">

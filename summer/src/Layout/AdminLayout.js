@@ -9,7 +9,7 @@ const AdminLayout = ({ children, userDetails, onLogout }) => {
   const handleLogout = () => {
     // 🔄 Clear admin state & redirect
     if (onLogout) onLogout();
-    navigate('/admin-login', { replace: true }); // ✅ redirect after logout
+    navigate('/login', { replace: true }); // ✅ redirect after logout
   };
 
   return (
