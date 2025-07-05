@@ -23,7 +23,10 @@ import AddProduct from './admin/AddProduct';
 
 import { serverEndpoint } from './components/config';
 import { SET_USER, CLEAR_USER } from './redux/user/actions';
-import { loadCartFromBackend, clearCart } from './redux/cart/actions';
+import { fetchCartFromBackend, clearCart } from './redux/cart/actions';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+
 
 function App() {
   const [sessionChecked, setSessionChecked] = useState(false);
@@ -39,7 +42,7 @@ function App() {
 
         if (res.data.success && res.data.userDetails) {
           dispatch({ type: SET_USER, payload: res.data.userDetails });
-          dispatch(loadCartFromBackend());
+          await dispatch(fetchCartFromBackend());
         } else {
           dispatch({ type: CLEAR_USER });
           dispatch(clearCart());
@@ -64,121 +67,122 @@ function App() {
   const isAdmin = userDetails?.isAdmin;
 
   if (!sessionChecked) {
-    return <div>Loading...</div>; // Or a custom spinner
+    return <div>Loading...</div>;
   }
 
   return (
-    <Routes>
-      <Route
-        path="/"
-        element={
-          <Applayout userDetails={userDetails} onLogout={handleLogout}>
-            {isLoggedIn && !isAdmin ? <HomePrivate /> : <HomePublic />}
-          </Applayout>
-        }
-      />
-
-      <Route
-        path="/login"
-        element={
-          <Applayout userDetails={userDetails} onLogout={handleLogout}>
-            <Login />
-          </Applayout>
-        }
-      />
-      <Route
-        path="/register"
-        element={
-          <Applayout userDetails={userDetails} onLogout={handleLogout}>
-            <Register />
-          </Applayout>
-        }
-      />
-      <Route path="/adminlogin" element={<AdminLogin />} />
-
-      <Route
-        path="/dashboard"
-        element={
-          isLoggedIn && !isAdmin ? (
+    <>
+      <Routes>
+        <Route
+          path="/"
+          element={
             <Applayout userDetails={userDetails} onLogout={handleLogout}>
-              <Dashboard />
+              {isLoggedIn && !isAdmin ? <HomePrivate /> : <HomePublic />}
             </Applayout>
-          ) : (
-            <Navigate to="/login" replace />
-          )
-        }
-      />
+          }
+        />
+        <Route
+          path="/login"
+          element={
+            <Applayout userDetails={userDetails} onLogout={handleLogout}>
+              <Login />
+            </Applayout>
+          }
+        />
+        <Route
+          path="/register"
+          element={
+            <Applayout userDetails={userDetails} onLogout={handleLogout}>
+              <Register />
+            </Applayout>
+          }
+        />
+        <Route path="/adminlogin" element={<AdminLogin />} />
+        <Route
+          path="/dashboard"
+          element={
+            isLoggedIn && !isAdmin ? (
+              <Applayout userDetails={userDetails} onLogout={handleLogout}>
+                <Dashboard />
+              </Applayout>
+            ) : (
+              <Navigate to="/login" replace />
+            )
+          }
+        />
+        <Route
+          path="/product"
+          element={
+            <Applayout userDetails={userDetails} onLogout={handleLogout}>
+              <Product />
+            </Applayout>
+          }
+        />
+        <Route
+          path="/about"
+          element={
+            <Applayout userDetails={userDetails} onLogout={handleLogout}>
+              <About />
+            </Applayout>
+          }
+        />
+        <Route
+          path="/contact"
+          element={
+            <Applayout userDetails={userDetails} onLogout={handleLogout}>
+              <Contact />
+            </Applayout>
+          }
+        />
+        <Route
+          path="/cart"
+          element={
+            <Applayout userDetails={userDetails} onLogout={handleLogout}>
+              <CartPage />
+            </Applayout>
+          }
+        />
+        <Route
+          path="/admin"
+          element={
+            isAdmin ? (
+              <AdminLayout userDetails={userDetails} onLogout={handleLogout}>
+                <AdminDashboard />
+              </AdminLayout>
+            ) : (
+              <Navigate to="/adminlogin" replace />
+            )
+          }
+        />
+        <Route
+          path="/admin/products"
+          element={
+            isAdmin ? (
+              <AdminLayout userDetails={userDetails} onLogout={handleLogout}>
+                <ManageProducts />
+              </AdminLayout>
+            ) : (
+              <Navigate to="/adminlogin" replace />
+            )
+          }
+        />
+        <Route
+          path="/admin/products/add"
+          element={
+            isAdmin ? (
+              <AdminLayout userDetails={userDetails} onLogout={handleLogout}>
+                <AddProduct />
+              </AdminLayout>
+            ) : (
+              <Navigate to="/adminlogin" replace />
+            )
+          }
+        />
+      </Routes>
 
-      <Route
-        path="/product"
-        element={
-          <Applayout userDetails={userDetails} onLogout={handleLogout}>
-            <Product />
-          </Applayout>
-        }
-      />
-      <Route
-        path="/about"
-        element={
-          <Applayout userDetails={userDetails} onLogout={handleLogout}>
-            <About />
-          </Applayout>
-        }
-      />
-      <Route
-        path="/contact"
-        element={
-          <Applayout userDetails={userDetails} onLogout={handleLogout}>
-            <Contact />
-          </Applayout>
-        }
-      />
-      <Route
-        path="/cart"
-        element={
-          <Applayout userDetails={userDetails} onLogout={handleLogout}>
-            <CartPage />
-          </Applayout>
-        }
-      />
-
-      <Route
-        path="/admin"
-        element={
-          isAdmin ? (
-            <AdminLayout userDetails={userDetails} onLogout={handleLogout}>
-              <AdminDashboard />
-            </AdminLayout>
-          ) : (
-            <Navigate to="/adminlogin" replace />
-          )
-        }
-      />
-      <Route
-        path="/admin/products"
-        element={
-          isAdmin ? (
-            <AdminLayout userDetails={userDetails} onLogout={handleLogout}>
-              <ManageProducts />
-            </AdminLayout>
-          ) : (
-            <Navigate to="/adminlogin" replace />
-          )
-        }
-      />
-      <Route
-        path="/admin/products/add"
-        element={
-          isAdmin ? (
-            <AdminLayout userDetails={userDetails} onLogout={handleLogout}>
-              <AddProduct />
-            </AdminLayout>
-          ) : (
-            <Navigate to="/adminlogin" replace />
-          )
-        }
-      />
-    </Routes>
+      {/* ✅ ToastContainer should be rendered here */}
+      <ToastContainer position="top-right" autoClose={3000} />
+    </>
   );
 }
 

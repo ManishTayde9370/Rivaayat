@@ -8,6 +8,11 @@ import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 import { useDispatch } from 'react-redux';
 import { addToCart } from '../redux/cart/actions';
 
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+
+
+
 const Product = () => {
   const [products, setProducts] = useState([]);
 
@@ -46,8 +51,14 @@ const ProductCard = ({ product }) => {
   const [activeIndex, setActiveIndex] = useState(0);
 
   const handleAddToCart = () => {
-    dispatch(addToCart(product));
+    dispatch(addToCart({ ...product, quantity: 1 }));
+    toast.success(`${product.name} added to cart!`, {
+      position: 'top-right',
+      autoClose: 2000,
+    });
   };
+
+  const fallbackImage = '/fallback.jpg'; // Replace with your actual fallback path
 
   return (
     <div className="col-md-4 mb-4">
@@ -55,8 +66,9 @@ const ProductCard = ({ product }) => {
         <div className="text-center p-3">
           <Zoom>
             <img
-              src={product.images[activeIndex]}
+              src={product.images[activeIndex] || fallbackImage}
               alt={product.name}
+              onError={(e) => (e.target.src = fallbackImage)}
               className="img-fluid rounded"
               style={{
                 height: '250px',
@@ -75,6 +87,7 @@ const ProductCard = ({ product }) => {
               src={img}
               alt={`thumb-${index}`}
               onClick={() => setActiveIndex(index)}
+              onError={(e) => (e.target.src = fallbackImage)}
               className={`m-1 border ${index === activeIndex ? 'border-warning' : 'border-light'}`}
               style={{
                 width: '50px',
@@ -92,8 +105,12 @@ const ProductCard = ({ product }) => {
           <h5 className="card-title" style={{ color: '#3e1f1f', fontWeight: 'bold' }}>{product.name}</h5>
           <p className="card-text text-muted">{product.description}</p>
           <h6 className="mb-3" style={{ color: '#7b3f00', fontWeight: 'bold' }}>₹{product.price}</h6>
-          <button className="btn btn-outline-dark rounded-pill px-4" onClick={handleAddToCart}>
-            Add to Cart
+          <button
+            className="btn btn-outline-dark rounded-pill px-4"
+            onClick={handleAddToCart}
+            disabled={product.stock === 0}
+          >
+            {product.stock === 0 ? 'Out of Stock' : 'Add to Cart'}
           </button>
         </div>
       </div>

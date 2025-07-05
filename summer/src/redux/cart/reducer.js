@@ -5,40 +5,53 @@ import {
   SET_CART,
 } from './actions';
 
-const initialState = [];
+const initialState = {
+  items: [],
+};
 
-const cartReducer = (state = initialState, action) => {
+const reducer = (state = initialState, action) => {
+  const items = Array.isArray(state.items) ? state.items : [];
+
   switch (action.type) {
     case ADD_TO_CART: {
-      const existingItem = state.find((item) => item._id === action.payload._id);
-
+      const existingItem = items.find(item => item._id === action.payload._id);
       if (existingItem) {
-        return state.map((item) =>
-          item._id === action.payload._id
-            ? { ...item, quantity: item.quantity + 1 }
-            : item
-        );
+        return {
+          ...state,
+          items: items.map(item =>
+            item._id === action.payload._id
+              ? { ...item, quantity: item.quantity + 1 }
+              : item
+          ),
+        };
       }
-
-      return [...state, { ...action.payload, quantity: 1 }];
+      return {
+        ...state,
+        items: [...items, { ...action.payload, quantity: 1 }],
+      };
     }
 
     case REMOVE_FROM_CART:
-      return state.filter((item) => item._id !== action.payload);
+      return {
+        ...state,
+        items: items.filter(item => item._id !== action.payload),
+      };
 
     case CLEAR_CART:
-      return [];
+      return {
+        ...state,
+        items: [],
+      };
 
     case SET_CART:
-      // Ensure every item from backend has a quantity
-      return action.payload.map((item) => ({
-        ...item,
-        quantity: item.quantity || 1,
-      }));
+      return {
+        ...state,
+        items: Array.isArray(action.payload) ? action.payload : [],
+      };
 
     default:
       return state;
   }
 };
 
-export default cartReducer;
+export default reducer;

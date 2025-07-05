@@ -3,17 +3,17 @@ import { useEffect } from 'react';
 import {
   removeFromCart,
   clearCart,
-  saveCartToBackend,
+  persistCartToBackend, // ✅ Correct function name
 } from '../redux/cart/actions';
 
+
 function CartPage() {
-  const cart = useSelector((state) => state.cart);
+  const cart = useSelector((state) => state.cart?.items || []); // ✅ cart is array of items
   const dispatch = useDispatch();
 
+  // ✅ Save cart to backend whenever it changes (even if empty)
   useEffect(() => {
-    if (cart.length > 0) {
-      dispatch(saveCartToBackend(cart));
-    }
+    dispatch(persistCartToBackend());
   }, [cart, dispatch]);
 
   const handleRemove = (productId) => {
@@ -24,7 +24,10 @@ function CartPage() {
     dispatch(clearCart());
   };
 
-  const total = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  const total = cart.reduce(
+    (acc, item) => acc + item.price * item.quantity,
+    0
+  );
 
   return (
     <div className="p-4">

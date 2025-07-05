@@ -1,22 +1,24 @@
-// components/CartIcon.js
-import React from 'react';
 import { useSelector } from 'react-redux';
-import { FaShoppingCart } from 'react-icons/fa';
-import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom'; // ✅ For navigation
+import '../css/CartIcon.css'; // ✅ Import your CSS for styling
 
 const CartIcon = () => {
-  const cart = useSelector((state) => state.cart);
-  const itemCount = cart.reduce((total, item) => total + item.quantity, 0);
+  const items = useSelector(state => state.cart.items);
+  const navigate = useNavigate(); // ✅ Hook from react-router-dom
+
+  const totalQuantity = Array.isArray(items)
+    ? items.reduce((sum, item) => sum + item.quantity, 0)
+    : 0;
+
+  const handleClick = () => {
+    navigate('/cart'); // ✅ Navigate to the cart page
+  };
 
   return (
-    <Link to="/cart" className="position-relative text-dark me-3">
-      <FaShoppingCart size={24} />
-      {itemCount > 0 && (
-        <span className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-          {itemCount}
-        </span>
-      )}
-    </Link>
+    <div className="cart-icon" onClick={handleClick} style={{ cursor: 'pointer' }}>
+      🛒
+      <span>{totalQuantity}</span>
+    </div>
   );
 };
 

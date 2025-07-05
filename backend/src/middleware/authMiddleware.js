@@ -7,13 +7,20 @@ const getTokenFromRequest = (req) => req.cookies?.[cookieName];
 
 const verifyToken = (token) => {
   try {
-    return jwt.verify(token, secret);
+    const decoded = jwt.verify(token, secret);
+
+    if (!decoded || !decoded._id) {
+      throw new Error('Invalid token payload');
+    }
+
+    return decoded;
   } catch (error) {
     throw new Error('Invalid or expired token');
   }
 };
 
 const authMiddleware = {
+  // ✅ Require authenticated user
   requireAuth: (req, res, next) => {
     const token = getTokenFromRequest(req);
     if (!token) {
@@ -28,6 +35,7 @@ const authMiddleware = {
     }
   },
 
+  // ✅ Require admin user
   requireAdmin: (req, res, next) => {
     const token = getTokenFromRequest(req);
     if (!token) {
@@ -36,9 +44,11 @@ const authMiddleware = {
 
     try {
       const decoded = verifyToken(token);
+
       if (!decoded.isAdmin) {
         return res.status(403).json({ success: false, message: 'Access denied: Admins only' });
       }
+
       req.user = decoded;
       next();
     } catch (error) {
@@ -46,18 +56,20 @@ const authMiddleware = {
     }
   },
 
+  // ✅ Optional: Attach user if token valid
   optionalAuth: (req, res, next) => {
     const token = getTokenFromRequest(req);
     if (token) {
       try {
         req.user = verifyToken(token);
       } catch (error) {
-        // Do nothing on error, it's optional
+        // ignore if token is invalid
       }
     }
     next();
   },
 
+  // ✅ General token verifier
   verifyToken: (req, res, next) => {
     const token = getTokenFromRequest(req);
     if (!token) {
