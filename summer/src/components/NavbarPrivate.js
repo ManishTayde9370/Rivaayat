@@ -43,11 +43,12 @@ const NavbarPrivate = ({ username, onLogout }) => {
               placeholder="Search"
               className="me-2"
               aria-label="Search"
+              color='black'
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
             <FaSearch
-              style={{ cursor: 'pointer', color: '#0d6efd' }}
+              style={{ cursor: 'pointer', color: 'black' }}
               size={18}
               onClick={handleSearch}
               title="Search"

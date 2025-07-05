@@ -75,42 +75,28 @@ const authController = {
 
     try {
       const user = await User.findOne({
-        $or: [
-          { username: identity },
-          { email: identity },
-          { phone: identity },
-        ],
+        $or: [{ username: identity }, { email: identity }, { phone: identity }],
       });
 
       if (!user) {
-        return res.status(401).json({
-          success: false,
-          message: 'Invalid credentials',
-        });
+        return res.status(401).json({ success: false, message: 'Invalid credentials' });
       }
 
       if (user.isGoogleUser) {
-        return res.status(403).json({
-          success: false,
-          message: 'Please login using Google',
-        });
+        return res.status(403).json({ success: false, message: 'Please login using Google' });
       }
 
       const isMatch = await bcrypt.compare(password, user.password);
       if (!isMatch) {
-        return res.status(401).json({
-          success: false,
-          message: 'Invalid credentials',
-        });
+        return res.status(401).json({ success: false, message: 'Invalid credentials' });
       }
 
       const payload = {
-  _id: user._id, // ✅ include this
-  username: user.username,
-  email: user.email,
-  isAdmin: user.isAdmin,
-};
-
+        _id: user._id,
+        username: user.username,
+        email: user.email,
+        isAdmin: user.isAdmin,
+      };
 
       const token = jwt.sign(payload, secret, { expiresIn: '1h' });
 
@@ -119,7 +105,7 @@ const authController = {
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'Lax',
         path: '/',
-        maxAge: 3600000,
+        maxAge: 3600000, // 1 hour
       });
 
       return res.status(200).json({
@@ -129,10 +115,7 @@ const authController = {
       });
     } catch (error) {
       console.error('Login error:', error);
-      return res.status(500).json({
-        success: false,
-        message: 'Server error',
-      });
+      return res.status(500).json({ success: false, message: 'Server error' });
     }
   },
 
@@ -170,9 +153,10 @@ const authController = {
       }
 
       const tokenPayload = {
+        _id: user._id,
         username: user.username,
-        name: user.name,
         email: user.email,
+        isAdmin: user.isAdmin,
       };
 
       const token = jwt.sign(tokenPayload, secret, { expiresIn: '1h' });
@@ -203,7 +187,7 @@ const authController = {
     res.clearCookie(cookieName, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      sameSite: process.env.NODE_ENV === 'production' ? 'Lax' : 'None',
+      sameSite: 'Lax',
       path: '/',
     });
 
