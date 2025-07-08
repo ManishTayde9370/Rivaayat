@@ -1,17 +1,17 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import Zoom from 'react-medium-image-zoom';
+import { useDispatch } from 'react-redux';
+import { addToCart } from '../redux/cart/actions';
+import { toast } from 'react-toastify';
+import { Link } from 'react-router-dom';
+
 import 'react-medium-image-zoom/dist/styles.css';
+import 'react-toastify/dist/ReactToastify.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 
-import { useDispatch } from 'react-redux';
-import { addToCart } from '../redux/cart/actions';
-
-import { toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
-
-
+import '../css/ProductPage.css';
 
 const Product = () => {
   const [products, setProducts] = useState([]);
@@ -32,9 +32,9 @@ const Product = () => {
   }, []);
 
   return (
-    <div className="container py-5">
-      <h2 className="text-center mb-5" style={{ fontFamily: 'Georgia', fontWeight: 'bold', color: '#4b2e2e' }}>
-        🛍️ Explore Our Royal Collection
+    <div className="container py-5 product-page-container">
+      <h2 className="section-heading text-center mb-5">
+        👑 Explore Our Royal Collection
       </h2>
 
       <div className="row justify-content-center">
@@ -49,6 +49,8 @@ const Product = () => {
 const ProductCard = ({ product }) => {
   const dispatch = useDispatch();
   const [activeIndex, setActiveIndex] = useState(0);
+  const fallbackImage = '/fallback.jpg';
+  const isOutOfStock = product.stock === 0;
 
   const handleAddToCart = () => {
     dispatch(addToCart({ ...product, quantity: 1 }));
@@ -58,29 +60,26 @@ const ProductCard = ({ product }) => {
     });
   };
 
-  const fallbackImage = '/fallback.jpg'; // Replace with your actual fallback path
-
   return (
-    <div className="col-md-4 mb-4">
-      <div className="card shadow-lg h-100 border-0" style={{ borderRadius: '20px' }}>
-        <div className="text-center p-3">
+    <div className="col-md-4 col-sm-6 mb-4">
+      <div className={`product-card shadow royal-border ${isOutOfStock ? 'out-of-stock-card' : ''}`}>
+        <div className="text-center p-3 position-relative">
+          {isOutOfStock && (
+            <span className="badge bg-danger out-of-stock-badge position-absolute top-0 start-0 m-2">
+              Out of Stock
+            </span>
+          )}
           <Zoom>
             <img
               src={product.images[activeIndex] || fallbackImage}
               alt={product.name}
               onError={(e) => (e.target.src = fallbackImage)}
-              className="img-fluid rounded"
-              style={{
-                height: '250px',
-                objectFit: 'cover',
-                border: '1px solid #fcecc5',
-                borderRadius: '10px',
-              }}
+              className="main-product-image"
             />
           </Zoom>
         </div>
 
-        <div className="d-flex justify-content-center mb-2 flex-wrap px-2">
+        <div className="thumbnail-row">
           {product.images.map((img, index) => (
             <img
               key={index}
@@ -88,29 +87,25 @@ const ProductCard = ({ product }) => {
               alt={`thumb-${index}`}
               onClick={() => setActiveIndex(index)}
               onError={(e) => (e.target.src = fallbackImage)}
-              className={`m-1 border ${index === activeIndex ? 'border-warning' : 'border-light'}`}
-              style={{
-                width: '50px',
-                height: '50px',
-                objectFit: 'cover',
-                cursor: 'pointer',
-                borderRadius: '5px',
-                boxShadow: '0 2px 4px rgba(0,0,0,0.2)',
-              }}
+              className={`thumbnail-img ${index === activeIndex ? 'active' : ''}`}
             />
           ))}
         </div>
 
         <div className="card-body text-center">
-          <h5 className="card-title" style={{ color: '#3e1f1f', fontWeight: 'bold' }}>{product.name}</h5>
-          <p className="card-text text-muted">{product.description}</p>
-          <h6 className="mb-3" style={{ color: '#7b3f00', fontWeight: 'bold' }}>₹{product.price}</h6>
+          <Link to={`/product/${product._id}`} className="product-link">
+            <h5 className="product-name">{product.name}</h5>
+          </Link>
+
+          {/* Removed product description here */}
+
+          <h6 className="product-price">₹{product.price}</h6>
           <button
-            className="btn btn-outline-dark rounded-pill px-4"
+            className={`btn add-to-cart-btn ${isOutOfStock ? 'disabled-btn' : ''}`}
             onClick={handleAddToCart}
-            disabled={product.stock === 0}
+            disabled={isOutOfStock}
           >
-            {product.stock === 0 ? 'Out of Stock' : 'Add to Cart'}
+            {isOutOfStock ? 'Out of Stock' : 'Add to Cart'}
           </button>
         </div>
       </div>

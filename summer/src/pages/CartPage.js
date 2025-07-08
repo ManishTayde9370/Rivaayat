@@ -1,17 +1,19 @@
 import { useSelector, useDispatch } from 'react-redux';
 import { useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   removeFromCart,
   clearCart,
-  persistCartToBackend, // ✅ Correct function name
+  persistCartToBackend,
 } from '../redux/cart/actions';
 
+import '../css/CartPage.css'; // Optional custom CSS
 
 function CartPage() {
-  const cart = useSelector((state) => state.cart?.items || []); // ✅ cart is array of items
+  const cart = useSelector((state) => state.cart?.items || []);
   const dispatch = useDispatch();
+  const navigate = useNavigate();
 
-  // ✅ Save cart to backend whenever it changes (even if empty)
   useEffect(() => {
     dispatch(persistCartToBackend());
   }, [cart, dispatch]);
@@ -24,43 +26,74 @@ function CartPage() {
     dispatch(clearCart());
   };
 
+  const handleCheckout = () => {
+    navigate('/checkout/shipping');
+  };
+
   const total = cart.reduce(
     (acc, item) => acc + item.price * item.quantity,
     0
   );
 
   return (
-    <div className="p-4">
-      <h2 className="text-2xl font-bold mb-4">🛒 Your Cart</h2>
+    <div className="container py-5">
+      <h2 className="mb-4 text-center royal-heading">🛒 Your Cart</h2>
 
       {cart.length === 0 ? (
-        <p>Your cart is empty.</p>
+        <p className="text-center">Your cart is empty.</p>
       ) : (
         <>
-          <ul className="space-y-4">
+          <div className="row g-4">
             {cart.map((item) => (
-              <li key={item._id} className="border p-4 rounded shadow">
-                <h3 className="text-lg font-semibold">{item.name}</h3>
-                <p>Quantity: {item.quantity}</p>
-                <p>Price: ₹{item.price}</p>
-                <button
-                  className="text-red-500 hover:underline mt-2"
-                  onClick={() => handleRemove(item._id)}
-                >
-                  Remove
-                </button>
-              </li>
+              <div key={item._id} className="col-md-6">
+                <div className="card shadow-sm h-100 border-0 cart-item-card">
+                  <div className="row g-0 align-items-center">
+                    <div className="col-4 text-center">
+                      <img
+                        src={item.images?.[0] || '/fallback.jpg'}
+                        alt={item.name}
+                        className="img-fluid rounded-start"
+                        style={{
+                          height: '100px',
+                          objectFit: 'cover',
+                          borderRadius: '12px',
+                        }}
+                        onError={(e) => (e.target.src = '/fallback.jpg')}
+                      />
+                    </div>
+                    <div className="col-8">
+                      <div className="card-body">
+                        <h5 className="card-title mb-1">{item.name}</h5>
+                        <p className="mb-1">Quantity: {item.quantity}</p>
+                        <p className="mb-1">Price: ₹{item.price}</p>
+                        <button
+                          className="btn btn-sm btn-outline-danger mt-2"
+                          onClick={() => handleRemove(item._id)}
+                        >
+                          Remove
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
             ))}
-          </ul>
+          </div>
 
-          <div className="mt-6 font-bold">Total: ₹{total}</div>
-
-          <button
-            className="mt-4 bg-red-600 text-white px-4 py-2 rounded"
-            onClick={handleClearCart}
-          >
-            Clear Cart
-          </button>
+          <div className="mt-5 d-flex justify-content-between align-items-center flex-wrap gap-3">
+            <h4 className="fw-bold royal-total">Total: ₹{total.toFixed(2)}</h4>
+            <div className="d-flex gap-3">
+              <button
+                className="btn btn-outline-secondary"
+                onClick={handleClearCart}
+              >
+                Clear Cart
+              </button>
+              <button className="btn btn-primary" onClick={handleCheckout}>
+                Proceed to Checkout
+              </button>
+            </div>
+          </div>
         </>
       )}
     </div>

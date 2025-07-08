@@ -66,16 +66,16 @@
 }
 
 .form-control {
-  background-color: transparent !important;
-  border-color: #fcecc5 !important;
-  color: #fcecc5 !important;
+  background-color: transparent;
+  border-color: #fcecc5 ;
+  color: #fcecc5 ;
 }
 
 /* Icons inside input */
 .input-group-text {
-  background-color: transparent !important;
-  border-color: #fcecc5 !important;
-  color: #fcecc5 !important;
+  background-color: transparent;
+  border-color: #fcecc5;
+  color: #fcecc5 ;
 }
 
 /* Button */

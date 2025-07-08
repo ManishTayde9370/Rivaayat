@@ -20,6 +20,14 @@ import AdminLogin from './admin/AdminLogin';
 import AdminDashboard from './admin/AdminDashboard';
 import ManageProducts from './admin/ManageProducts';
 import AddProduct from './admin/AddProduct';
+import ProductDetailPage from './pages/ProductDetailPage';
+import ShippingPage from './pages/ShippingPage';
+import PaymentPage from './pages/PaymentPage';
+import ConfirmationPage from './pages/ConfirmationPage';
+
+
+
+
 
 import { serverEndpoint } from './components/config';
 import { SET_USER, CLEAR_USER } from './redux/user/actions';
@@ -145,6 +153,7 @@ function App() {
             </Applayout>
           }
         />
+        <Route path="/product/:id" element={<ProductDetailPage />} />
         <Route
           path="/about"
           element={
@@ -169,6 +178,34 @@ function App() {
             </Applayout>
           }
         />
+        <Route
+  path="/checkout/shipping"
+  element={
+    <Applayout userDetails={userDetails} onLogout={handleLogout} sessionChecked={sessionChecked}>
+      <ShippingPage />
+    </Applayout>
+  }
+/>
+
+<Route
+  path="/checkout/payment"
+  element={
+    <Applayout userDetails={userDetails} onLogout={handleLogout} sessionChecked={sessionChecked}>
+      <PaymentPage />
+    </Applayout>
+  }
+/>
+
+<Route
+  path="/checkout/confirmation"
+  element={
+    <Applayout userDetails={userDetails} onLogout={handleLogout} sessionChecked={sessionChecked}>
+      <ConfirmationPage />
+    </Applayout>
+  }
+/>
+
+        
 
         <Route
           path="/admin"

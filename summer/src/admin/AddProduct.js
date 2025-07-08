@@ -1,4 +1,3 @@
-// src/admin/AddProduct.js
 import React, { useState } from 'react';
 import axios from 'axios';
 import { toast, ToastContainer } from 'react-toastify';
@@ -11,6 +10,8 @@ const AddProduct = () => {
     name: '',
     description: '',
     price: '',
+    stock: '',
+    category: '',
     images: [],
   });
 
@@ -35,10 +36,15 @@ const AddProduct = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const { name, description, price, images } = form;
+    const { name, description, price, stock, images, category } = form;
 
-    if (!name || !description || !price || images.length === 0) {
+    if (!name || !description || !price || !stock || images.length === 0) {
       toast.error('All fields and at least one image are required.');
+      return;
+    }
+
+    if (price < 0 || stock < 0) {
+      toast.error('Price and stock cannot be negative.');
       return;
     }
 
@@ -47,11 +53,13 @@ const AddProduct = () => {
       formData.append('name', name);
       formData.append('description', description);
       formData.append('price', price);
+      formData.append('stock', stock);
+      if (category) formData.append('category', category);
       images.forEach((img) => formData.append('images', img));
 
       setUploading(true);
 
-      const res = await axios.post(
+      await axios.post(
         'http://localhost:5000/api/admin/products',
         formData,
         {
@@ -84,6 +92,7 @@ const AddProduct = () => {
             value={form.name}
             onChange={handleChange}
             required
+            disabled={uploading}
           />
         </div>
 
@@ -96,11 +105,12 @@ const AddProduct = () => {
             value={form.description}
             onChange={handleChange}
             required
+            disabled={uploading}
           />
         </div>
 
         <div className="mb-3">
-          <label>Price</label>
+          <label>Price (₹)</label>
           <input
             type="number"
             className="form-control"
@@ -108,6 +118,34 @@ const AddProduct = () => {
             value={form.price}
             onChange={handleChange}
             required
+            min="0"
+            disabled={uploading}
+          />
+        </div>
+
+        <div className="mb-3">
+          <label>Stock</label>
+          <input
+            type="number"
+            className="form-control"
+            name="stock"
+            value={form.stock}
+            onChange={handleChange}
+            required
+            min="0"
+            disabled={uploading}
+          />
+        </div>
+
+        <div className="mb-3">
+          <label>Category (optional)</label>
+          <input
+            type="text"
+            className="form-control"
+            name="category"
+            value={form.category}
+            onChange={handleChange}
+            disabled={uploading}
           />
         </div>
 
@@ -120,6 +158,7 @@ const AddProduct = () => {
             multiple
             onChange={handleChange}
             accept="image/*"
+            disabled={uploading}
           />
         </div>
 

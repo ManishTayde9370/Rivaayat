@@ -39,14 +39,15 @@ const NavbarPrivate = ({ username, onLogout }) => {
           {/* Middle section - Search */}
           <Form className="d-flex align-items-center me-3" onSubmit={e => e.preventDefault()}>
             <FormControl
-              type="search"
-              placeholder="Search"
-              className="me-2"
-              aria-label="Search"
-              color='black'
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
+  type="search"
+  placeholder="Search"
+  className="me-2 black-placeholder"
+  aria-label="Search"
+  value={searchTerm}
+  onChange={(e) => setSearchTerm(e.target.value)}
+  style={{ color: 'black' }} // makes typed input black
+/>
+
             <FaSearch
               style={{ cursor: 'pointer', color: 'black' }}
               size={18}

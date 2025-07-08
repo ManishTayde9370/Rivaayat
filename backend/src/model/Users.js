@@ -39,7 +39,13 @@ const userSchema = new mongoose.Schema({
   isAdmin: {
     type: Boolean,
     default: false // Normal users are not admins
-  }
+  },
+  wishlist: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Product'
+    }
+  ]
 }, {
   timestamps: true // Adds createdAt and updatedAt automatically
 });

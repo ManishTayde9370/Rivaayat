@@ -49,6 +49,7 @@ const Contact = () => {
                   value={formData.name}
                   onChange={handleChange}
                   required
+                  style={{ color: 'black' }}
                 />
               </div>
 
@@ -62,6 +63,7 @@ const Contact = () => {
                   value={formData.email}
                   onChange={handleChange}
                   required
+                  style={{ color: 'black' }}
                 />
               </div>
 
@@ -75,6 +77,7 @@ const Contact = () => {
                   value={formData.message}
                   onChange={handleChange}
                   required
+                  style={{ color: 'black' }}
                 ></textarea>
               </div>
 

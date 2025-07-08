@@ -1,18 +1,27 @@
 import { createStore, combineReducers, applyMiddleware } from 'redux';
+
 import { thunk } from 'redux-thunk';
+
 
 import { userReducer } from './redux/user/reducer';
 import cartReducer from './redux/cart/reducer';
+import wishlistReducer from './redux/wishlist/reducer'; // ✅ add this
 
 // Combine reducers
 const rootReducer = combineReducers({
   user: userReducer,
   cart: cartReducer,
+  wishlist: wishlistReducer, // ✅ include wishlist reducer
 });
 
-// Initial state (cart will load from DB after login)
+// Optional: Initial state (not needed if reducers handle default state)
 const initialState = {
-  cart: [],
+  cart: {
+    items: [], // ✅ proper shape
+  },
+  wishlist: {
+    items: [], // ✅ ensure it matches reducer default
+  },
 };
 
 // Create Redux store with middleware

@@ -10,6 +10,8 @@ const adminRoutes = require('./src/routes/adminRoutes');
 const adminProductRoutes = require('./src/routes/adminProductRoutes');
 const publicProductRoutes = require('./src/routes/publicProductRoutes');
 const cartRoutes = require('./src/routes/cartRoutes');
+const wishlistRoutes = require('./src/routes/wishlistRoutes');
+
 
 const app = express();
 
@@ -35,6 +37,8 @@ app.use('/api/admin', adminRoutes);
 app.use('/api/admin/products', adminProductRoutes);
 app.use('/api/products', publicProductRoutes);
 app.use('/api/cart', cartRoutes);
+app.use('/api/wishlist', wishlistRoutes);
+
 
 app.get('/', (req, res) => {
   res.send('🌿 Rivaayat Server is running');

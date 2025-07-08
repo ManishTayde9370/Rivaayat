@@ -1,4 +1,3 @@
-// src/admin/ManageProducts.js
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Table, Button, Modal, Form, Image } from 'react-bootstrap';
@@ -15,15 +14,18 @@ const ManageProducts = () => {
     name: '',
     description: '',
     price: '',
+    stock: '',
+    category: '',
     images: [],
   });
 
+  // Fetch all products on mount
   const fetchProducts = async () => {
     try {
       const res = await axios.get(API, { withCredentials: true });
       setProducts(res.data.products || []);
     } catch (err) {
-      toast.error('Failed to load products');
+      toast.error('❌ Failed to load products');
     }
   };
 
@@ -31,6 +33,7 @@ const ManageProducts = () => {
     fetchProducts();
   }, []);
 
+  // Handle input changes
   const handleChange = (e) => {
     const { name, value, files } = e.target;
     if (name === 'images') {
@@ -40,45 +43,59 @@ const ManageProducts = () => {
     }
   };
 
+  // Submit form (add or edit)
   const handleSubmit = async () => {
+    const { name, description, price, stock, category, images } = formData;
+
+    // Basic validation
+    if (!name || !description || !price || !stock) {
+      toast.error('Please fill all required fields');
+      return;
+    }
+
+    if (price < 0 || stock < 0) {
+      toast.error('Price and stock cannot be negative');
+      return;
+    }
+
     const data = new FormData();
-    data.append('name', formData.name);
-    data.append('description', formData.description);
-    data.append('price', formData.price);
-    formData.images.forEach((file) => data.append('images', file));
+    data.append('name', name);
+    data.append('description', description);
+    data.append('price', parseFloat(price));
+    data.append('stock', parseInt(stock));
+    if (category) data.append('category', category);
+    images.forEach((file) => data.append('images', file));
 
     try {
       if (editingProduct) {
-        await axios.put(`${API}/${editingProduct._id}`, data, {
-          withCredentials: true,
-        });
-        toast.success('Product updated');
+        await axios.put(`${API}/${editingProduct._id}`, data, { withCredentials: true });
+        toast.success('✅ Product updated');
       } else {
-        await axios.post(API, data, {
-          withCredentials: true,
-        });
-        toast.success('Product added');
+        await axios.post(API, data, { withCredentials: true });
+        toast.success('✅ Product added');
       }
       setShowModal(false);
       resetForm();
       fetchProducts();
     } catch (err) {
-      toast.error('Error saving product');
+      toast.error('❌ Error saving product');
     }
   };
 
+  // Delete product
   const handleDelete = async (id) => {
-    if (window.confirm('Delete this product?')) {
+    if (window.confirm('Are you sure you want to delete this product?')) {
       try {
         await axios.delete(`${API}/${id}`, { withCredentials: true });
-        toast.success('Product deleted');
+        toast.success('🗑️ Product deleted');
         fetchProducts();
       } catch (err) {
-        toast.error('Failed to delete');
+        toast.error('❌ Failed to delete product');
       }
     }
   };
 
+  // Open modal (for add or edit)
   const openModal = (product = null) => {
     if (product) {
       setEditingProduct(product);
@@ -86,6 +103,8 @@ const ManageProducts = () => {
         name: product.name,
         description: product.description,
         price: product.price || '',
+        stock: product.stock || '',
+        category: product.category || '',
         images: [],
       });
     } else {
@@ -94,8 +113,16 @@ const ManageProducts = () => {
     setShowModal(true);
   };
 
+  // Reset form to initial state
   const resetForm = () => {
-    setFormData({ name: '', description: '', price: '', images: [] });
+    setFormData({
+      name: '',
+      description: '',
+      price: '',
+      stock: '',
+      category: '',
+      images: [],
+    });
     setEditingProduct(null);
   };
 
@@ -105,13 +132,16 @@ const ManageProducts = () => {
       <Button variant="success" className="mb-3" onClick={() => openModal()}>
         ➕ Add Product
       </Button>
+
       <Table striped bordered hover responsive>
         <thead>
           <tr>
             <th style={{ minWidth: '150px' }}>Images</th>
             <th>Name</th>
             <th>Description</th>
-            <th>Price</th>
+            <th>Price (₹)</th>
+            <th>Stock</th>
+            <th>Category</th>
             <th style={{ width: '150px' }}>Actions</th>
           </tr>
         </thead>
@@ -122,7 +152,7 @@ const ManageProducts = () => {
                 {p.images?.map((img, i) => (
                   <Image
                     key={i}
-                    src={`http://localhost:5000/${img}`}
+                    src={img.startsWith('http') ? img : `http://localhost:5000/${img}`}
                     alt="img"
                     width={60}
                     height={60}
@@ -133,7 +163,9 @@ const ManageProducts = () => {
               </td>
               <td>{p.name}</td>
               <td>{p.description}</td>
-              <td>{p.price}</td>
+              <td>₹{p.price}</td>
+              <td>{p.stock}</td>
+              <td>{p.category || '—'}</td>
               <td>
                 <Button size="sm" variant="warning" onClick={() => openModal(p)}>
                   Edit
@@ -147,7 +179,7 @@ const ManageProducts = () => {
         </tbody>
       </Table>
 
-      {/* Modal Form */}
+      {/* Modal */}
       <Modal show={showModal} onHide={() => setShowModal(false)} centered>
         <Modal.Header closeButton>
           <Modal.Title>{editingProduct ? 'Edit Product' : 'Add Product'}</Modal.Title>
@@ -177,10 +209,32 @@ const ManageProducts = () => {
             <Form.Group className="mb-3">
               <Form.Label>Price (₹)</Form.Label>
               <Form.Control
+                type="number"
                 name="price"
+                min="0"
                 value={formData.price}
                 onChange={handleChange}
                 placeholder="e.g. 1299"
+              />
+            </Form.Group>
+            <Form.Group className="mb-3">
+              <Form.Label>Stock</Form.Label>
+              <Form.Control
+                type="number"
+                name="stock"
+                min="0"
+                value={formData.stock}
+                onChange={handleChange}
+                placeholder="e.g. 10"
+              />
+            </Form.Group>
+            <Form.Group className="mb-3">
+              <Form.Label>Category</Form.Label>
+              <Form.Control
+                name="category"
+                value={formData.category}
+                onChange={handleChange}
+                placeholder="e.g. Electronics"
               />
             </Form.Group>
             <Form.Group className="mb-3">
