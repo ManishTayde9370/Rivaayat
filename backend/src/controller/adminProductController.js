@@ -1,8 +1,7 @@
 const Product = require('../model/Product');
-const fs = require('fs');
-const path = require('path');
+const { cloudinary } = require('../utils/cloudinary'); // 👈 Make sure this is setup
 
-// ➕ Add Product with multiple images
+// ➕ Add Product
 exports.createProduct = async (req, res) => {
   try {
     const { name, description, price, stock, category } = req.body;
@@ -64,32 +63,33 @@ exports.updateProduct = async (req, res) => {
       category: category?.trim() || '',
     };
 
-    // If new images uploaded, replace existing
-    if (Array.isArray(req.files) && req.files.length > 0) {
-      const product = await Product.findById(req.params.id);
-      if (!product) {
-        return res.status(404).json({ success: false, message: 'Product not found' });
-      }
+    const product = await Product.findById(req.params.id);
+    if (!product) {
+      return res.status(404).json({ success: false, message: 'Product not found' });
+    }
 
+    // If new images uploaded, delete old ones from Cloudinary
+    if (Array.isArray(req.files) && req.files.length > 0) {
       if (Array.isArray(product.images) && product.images.length > 0) {
-        product.images.forEach((imgPath) => {
-          const localPath = path.normalize(path.join(__dirname, '..', imgPath));
-          fs.unlink(localPath, (err) => {
-            if (err) {
-              console.warn('⚠️ Failed to delete old image:', localPath, err.message);
-            }
-          });
-        });
+        for (const imgUrl of product.images) {
+          try {
+            const parts = imgUrl.split('/');
+            const fileName = parts[parts.length - 1]; // abcxyz.jpg
+            const publicIdWithExt = fileName.split('.')[0]; // abcxyz
+            const folder = 'rivaayaat_products'; // Your folder name
+            const public_id = `${folder}/${publicIdWithExt}`;
+
+            await cloudinary.uploader.destroy(public_id);
+          } catch (err) {
+            console.warn(`⚠️ Failed to delete image from Cloudinary: ${imgUrl}`);
+          }
+        }
       }
 
       updateData.images = req.files.map((file) => file.path);
     }
 
     const updated = await Product.findByIdAndUpdate(req.params.id, updateData, { new: true });
-
-    if (!updated) {
-      return res.status(404).json({ success: false, message: 'Product not found' });
-    }
 
     return res.json({
       success: true,
@@ -110,18 +110,24 @@ exports.deleteProduct = async (req, res) => {
       return res.status(404).json({ success: false, message: 'Product not found' });
     }
 
+    // Delete Cloudinary images
     if (Array.isArray(product.images) && product.images.length > 0) {
-      product.images.forEach((imgPath) => {
-        const localPath = path.normalize(path.join(__dirname, '..', imgPath));
-        fs.unlink(localPath, (err) => {
-          if (err) {
-            console.warn('⚠️ Failed to delete image:', localPath, err.message);
-          }
-        });
-      });
+      for (const imgUrl of product.images) {
+        try {
+          const parts = imgUrl.split('/');
+          const fileName = parts[parts.length - 1]; // abcxyz.jpg
+          const publicIdWithExt = fileName.split('.')[0]; // abcxyz
+          const folder = 'rivaayaat_products';
+          const public_id = `${folder}/${publicIdWithExt}`;
+
+          await cloudinary.uploader.destroy(public_id);
+        } catch (err) {
+          console.warn(`⚠️ Failed to delete image from Cloudinary: ${imgUrl}`);
+        }
+      }
     }
 
-    await product.remove();
+    await product.deleteOne(); // ✅ Replaces deprecated .remove()
 
     return res.json({
       success: true,

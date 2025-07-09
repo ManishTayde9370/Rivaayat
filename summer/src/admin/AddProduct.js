@@ -33,49 +33,55 @@ const AddProduct = () => {
     }
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+ const handleSubmit = async (e) => {
+  e.preventDefault();
 
-    const { name, description, price, stock, images, category } = form;
+  const { name, description, price, stock, images, category } = form;
 
-    if (!name || !description || !price || !stock || images.length === 0) {
-      toast.error('All fields and at least one image are required.');
-      return;
+  if (!name || !description || !price || !stock || images.length === 0) {
+    toast.error('All fields and at least one image are required.');
+    return;
+  }
+
+  if (price < 0 || stock < 0) {
+    toast.error('Price and stock cannot be negative.');
+    return;
+  }
+
+  try {
+    const formData = new FormData();
+    formData.append('name', name);
+    formData.append('description', description);
+    formData.append('price', price);
+    formData.append('stock', stock);
+    if (category) formData.append('category', category);
+    images.forEach((img) => formData.append('images', img));
+
+    // ✅ Debugging output
+    for (let pair of formData.entries()) {
+      console.log(`${pair[0]}:`, pair[1]);
     }
 
-    if (price < 0 || stock < 0) {
-      toast.error('Price and stock cannot be negative.');
-      return;
-    }
+    setUploading(true);
 
-    try {
-      const formData = new FormData();
-      formData.append('name', name);
-      formData.append('description', description);
-      formData.append('price', price);
-      formData.append('stock', stock);
-      if (category) formData.append('category', category);
-      images.forEach((img) => formData.append('images', img));
+    await axios.post(
+      'http://localhost:5000/api/admin/products',
+      formData,
+      {
+        withCredentials: true,
+        headers: { 'Content-Type': 'multipart/form-data' },
+      }
+    );
 
-      setUploading(true);
+    toast.success('✅ Product added');
+    setTimeout(() => navigate('/admin/products'), 1500);
+  } catch (err) {
+    toast.error(err.response?.data?.message || 'Failed to add product');
+  } finally {
+    setUploading(false);
+  }
+};
 
-      await axios.post(
-        'http://localhost:5000/api/admin/products',
-        formData,
-        {
-          withCredentials: true,
-          headers: { 'Content-Type': 'multipart/form-data' },
-        }
-      );
-
-      toast.success('✅ Product added');
-      setTimeout(() => navigate('/admin/products'), 1500);
-    } catch (err) {
-      toast.error(err.response?.data?.message || 'Failed to add product');
-    } finally {
-      setUploading(false);
-    }
-  };
 
   return (
     <div className="container mt-5" style={{ maxWidth: '700px' }}>

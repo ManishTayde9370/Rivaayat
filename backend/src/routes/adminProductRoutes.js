@@ -2,23 +2,20 @@ const express = require('express');
 const multer = require('multer');
 const { requireAdmin } = require('../middleware/authMiddleware');
 const productController = require('../controller/adminProductController');
-const { storage } = require('../utils/cloudinary'); // ✅ Cloudinary storage setup
+const { storage } = require('../utils/cloudinary');
 
 const router = express.Router();
 
-// ✅ Multer config with Cloudinary
 const upload = multer({
   storage,
   limits: { fileSize: 5 * 1024 * 1024 }, // Max 5MB per image
 });
 
-// ✅ Admin Product Routes
-
-// ➕ Create Product (multiple images)
+// ➕ Create Product
 router.post(
   '/',
   requireAdmin,
-  upload.array('images', 5), // Max 5 images
+  upload.array('images', 5),
   productController.createProduct
 );
 
