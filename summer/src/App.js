@@ -21,9 +21,11 @@ import AdminDashboard from './admin/AdminDashboard';
 import ManageProducts from './admin/ManageProducts';
 import AddProduct from './admin/AddProduct';
 import ProductDetailPage from './pages/ProductDetailPage';
-import ShippingPage from './pages/ShippingPage';
-import PaymentPage from './pages/PaymentPage';
-import ConfirmationPage from './pages/ConfirmationPage';
+import CheckoutShipping from './pages/CheckoutShipping';
+import CheckoutPayment from './pages/CheckoutPayment';
+
+
+
 
 
 
@@ -34,6 +36,8 @@ import { SET_USER, CLEAR_USER } from './redux/user/actions';
 import { fetchCartFromBackend, clearCart } from './redux/cart/actions';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+
+import CheckoutPage from './pages/CheckoutPage';
 
 function App() {
   const [sessionChecked, setSessionChecked] = useState(false);
@@ -178,30 +182,43 @@ function App() {
             </Applayout>
           }
         />
-        <Route
-  path="/checkout/shipping"
+
+<Route
+  path="/checkout"
   element={
-    <Applayout userDetails={userDetails} onLogout={handleLogout} sessionChecked={sessionChecked}>
-      <ShippingPage />
-    </Applayout>
+    isLoggedIn && !isAdmin ? (
+      <Applayout userDetails={userDetails} onLogout={handleLogout} sessionChecked={sessionChecked}>
+        <CheckoutPage />
+      </Applayout>
+    ) : (
+      <Navigate to="/login" replace />
+    )
   }
 />
 
+
+<Route
+  path="/checkout/shipping"
+  element={
+    isLoggedIn && !isAdmin ? (
+      <Applayout userDetails={userDetails} onLogout={handleLogout} sessionChecked={sessionChecked}>
+        <CheckoutShipping />
+      </Applayout>
+    ) : (
+      <Navigate to="/login" replace />
+    )
+  }
+/>
 <Route
   path="/checkout/payment"
   element={
-    <Applayout userDetails={userDetails} onLogout={handleLogout} sessionChecked={sessionChecked}>
-      <PaymentPage />
-    </Applayout>
-  }
-/>
-
-<Route
-  path="/checkout/confirmation"
-  element={
-    <Applayout userDetails={userDetails} onLogout={handleLogout} sessionChecked={sessionChecked}>
-      <ConfirmationPage />
-    </Applayout>
+    isLoggedIn && !isAdmin ? (
+      <Applayout userDetails={userDetails} onLogout={handleLogout} sessionChecked={sessionChecked}>
+        <CheckoutPayment />
+      </Applayout>
+    ) : (
+      <Navigate to="/login" replace />
+    )
   }
 />
 

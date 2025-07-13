@@ -1,30 +1,35 @@
 import { createStore, combineReducers, applyMiddleware } from 'redux';
-
 import { thunk } from 'redux-thunk';
-
 
 import { userReducer } from './redux/user/reducer';
 import cartReducer from './redux/cart/reducer';
-import wishlistReducer from './redux/wishlist/reducer'; // ✅ add this
+import wishlistReducer from './redux/wishlist/reducer';
+import orderReducer from './redux/orderSlice';
+import shippingReducer from './redux/shipping/reducer'; // ✅ NEW
 
-// Combine reducers
 const rootReducer = combineReducers({
   user: userReducer,
   cart: cartReducer,
-  wishlist: wishlistReducer, // ✅ include wishlist reducer
+  wishlist: wishlistReducer,
+  order: orderReducer,
+  shipping: shippingReducer, // ✅ ADD TO ROOT
 });
 
-// Optional: Initial state (not needed if reducers handle default state)
 const initialState = {
   cart: {
-    items: [], // ✅ proper shape
+    items: [],
   },
   wishlist: {
-    items: [], // ✅ ensure it matches reducer default
+    items: [],
+  },
+  order: {
+    lastOrder: null,
+  },
+  shipping: {
+    address: null, // ✅ INITIALIZE
   },
 };
 
-// Create Redux store with middleware
 const store = createStore(
   rootReducer,
   initialState,
