@@ -1,134 +1,67 @@
+import React, { useState } from 'react';
+import { useDispatch } from 'react-redux';
+import { setShippingAddress } from '../redux/shipping/actions'; // ✅ Make sure it's "actions.js", not "action.js"
+
 import { useNavigate } from 'react-router-dom';
-import { useState, useEffect, useRef } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { setShippingAddress } from '../redux/shipping';
 
-function CheckoutShipping() {
-  const navigate = useNavigate();
+const CheckoutShipping = () => {
+  const [address, setAddress] = useState('');
+  const [city, setCity] = useState('');
   const dispatch = useDispatch();
-  const storedAddress = useSelector((state) => state.shipping.address);
-  const currentUser = useSelector((state) => state.user.currentUser);
+  const navigate = useNavigate();
 
-  const [shipping, setShipping] = useState({
-    fullName: '',
-    email: '',
-    phone: '',
-    pincode: '',
-    address: '',
-    city: '',
-    state: '',
-  });
+  const handleSubmit = (e) => {
+    e.preventDefault();
 
-  const inputRefs = useRef({});
-
-  useEffect(() => {
-    if (storedAddress) {
-      setShipping(storedAddress);
-    } else if (currentUser?.email) {
-      setShipping((prev) => ({
-        ...prev,
-        email: currentUser.email,
-      }));
-    }
-  }, [storedAddress, currentUser]);
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setShipping((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-  };
-
-  const handleContinue = () => {
-    const { fullName, email, phone, pincode, address, city, state } = shipping;
-
-    const phoneRegex = /^[6-9]\d{9}$/;
-    const pincodeRegex = /^\d{6}$/;
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-    for (const [key, value] of Object.entries(shipping)) {
-      if (!value.trim()) {
-        alert(`Please enter your ${key.replace(/([A-Z])/g, ' $1').toLowerCase()}`);
-        inputRefs.current[key]?.focus();
-        return;
-      }
-    }
-
-    if (!emailRegex.test(email)) {
-      alert('Please enter a valid email address');
-      inputRefs.current.email?.focus();
+    // Optional: Basic validation
+    if (!address.trim() || !city.trim()) {
+      alert('Please fill out all fields');
       return;
     }
 
-    if (!phoneRegex.test(phone)) {
-      alert('Please enter a valid 10-digit phone number');
-      inputRefs.current.phone?.focus();
-      return;
-    }
+    // Dispatch the shipping address to Redux
+    dispatch(setShippingAddress({ address, city }));
 
-    if (!pincodeRegex.test(pincode)) {
-      alert('Please enter a valid 6-digit pincode');
-      inputRefs.current.pincode?.focus();
-      return;
-    }
-
-    dispatch(setShippingAddress(shipping));
+    // Navigate to payment step
     navigate('/checkout/payment');
   };
 
-  const isFormComplete = Object.values(shipping).every((val) => val.trim() !== '');
-
   return (
     <div className="container py-5">
-      <h2 className="mb-4">🚚 Shipping Details</h2>
-
-      <div className="row g-3">
-        {[
-          { label: 'Full Name', name: 'fullName', type: 'text' },
-          { label: 'Email', name: 'email', type: 'email' },
-          { label: 'Phone Number', name: 'phone', type: 'tel' },
-          { label: 'Pincode', name: 'pincode', type: 'text' },
-          { label: 'City', name: 'city', type: 'text' },
-          { label: 'State', name: 'state', type: 'text' },
-        ].map(({ label, name, type }) => (
-          <div key={name} className="col-md-6">
-            <label className="form-label">{label}</label>
-            <input
-              ref={(el) => (inputRefs.current[name] = el)}
-              type={type}
-              name={name}
-              value={shipping[name]}
-              onChange={handleChange}
-              className="form-control"
-              required
-            />
-          </div>
-        ))}
-
-        <div className="col-md-12">
-          <label className="form-label">Shipping Address</label>
-          <textarea
-            ref={(el) => (inputRefs.current.address = el)}
-            name="address"
-            value={shipping.address}
-            onChange={handleChange}
-            rows={3}
+      <h2 className="mb-4">Shipping Address</h2>
+      <form onSubmit={handleSubmit} className="d-flex flex-column gap-3" style={{ maxWidth: '400px' }}>
+        <div>
+          <label htmlFor="address">Address</label>
+          <input
+            id="address"
+            type="text"
             className="form-control"
+            value={address}
+            onChange={(e) => setAddress(e.target.value)}
+            placeholder="123 Main St"
             required
           />
         </div>
-      </div>
 
-      <button
-        className="btn btn-primary mt-4"
-        onClick={handleContinue}
-        disabled={!isFormComplete}
-      >
-        Continue to Payment
-      </button>
+        <div>
+          <label htmlFor="city">City</label>
+          <input
+            id="city"
+            type="text"
+            className="form-control"
+            value={city}
+            onChange={(e) => setCity(e.target.value)}
+            placeholder="City Name"
+            required
+          />
+        </div>
+
+        <button type="submit" className="btn btn-primary w-100">
+          Continue to Payment
+        </button>
+      </form>
     </div>
   );
-}
+};
 
 export default CheckoutShipping;

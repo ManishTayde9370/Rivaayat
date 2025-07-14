@@ -1,26 +1,58 @@
 const mongoose = require('mongoose');
 
-const orderSchema = new mongoose.Schema({
-  user: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
-  products: [
-    {
-      product: { type: mongoose.Schema.Types.ObjectId, ref: 'Product' },
-      quantity: Number,
-      price: Number,
+const orderSchema = new mongoose.Schema(
+  {
+    user: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+      required: true,
     },
-  ],
-  totalAmount: Number,
-  shippingAddress: String, // or use object format as shown above
-  razorpayOrderId: String,
-  razorpayPaymentId: String,
-  paymentStatus: { type: String, default: 'Pending' },
-  status: {
-    type: String,
-    enum: ['Processing', 'Shipped', 'Delivered', 'Cancelled'],
-    default: 'Processing',
+    shippingAddress: {
+      address: { type: String, required: true },
+      city: { type: String, required: true },
+      state: { type: String },
+      postalCode: { type: String, required: true },
+      country: { type: String, default: 'India' },
+    },
+    items: [
+      {
+        product: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: 'Product',
+          required: true,
+        },
+        name: { type: String, required: true },
+        price: { type: Number, required: true },
+        quantity: { type: Number, required: true },
+        image: { type: String },
+      },
+    ],
+    paymentInfo: {
+      razorpay_order_id: { type: String },
+      razorpay_payment_id: { type: String },
+      razorpay_signature: { type: String },
+    },
+    amountPaid: {
+      type: Number,
+      required: true,
+    },
+    isPaid: {
+      type: Boolean,
+      default: false,
+    },
+    paidAt: {
+      type: Date,
+    },
+    status: {
+  type: String,
+  enum: ['Pending', 'Processing', 'Shipped', 'Delivered', 'Cancelled'],
+  default: 'Pending',
+},
+
   },
-  estimatedDelivery: Date,
-  createdAt: { type: Date, default: Date.now },
-});
+  {
+    timestamps: true, // adds createdAt and updatedAt
+  }
+);
 
 module.exports = mongoose.model('Order', orderSchema);

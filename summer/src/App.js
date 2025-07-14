@@ -15,29 +15,22 @@ import HomePublic from './pages/HomePublic';
 import HomePrivate from './pages/HomePrivate';
 import Product from './pages/Product';
 import CartPage from './pages/CartPage';
+import ProductDetailPage from './pages/ProductDetailPage';
+
+import CheckoutShipping from './pages/CheckoutShipping';
+import CheckoutPayment from './pages/CheckoutPayment';
+import CheckoutSuccess from './pages/CheckoutSuccess';
 
 import AdminLogin from './admin/AdminLogin';
 import AdminDashboard from './admin/AdminDashboard';
 import ManageProducts from './admin/ManageProducts';
 import AddProduct from './admin/AddProduct';
-import ProductDetailPage from './pages/ProductDetailPage';
-import CheckoutShipping from './pages/CheckoutShipping';
-import CheckoutPayment from './pages/CheckoutPayment';
-
-
-
-
-
-
-
 
 import { serverEndpoint } from './components/config';
 import { SET_USER, CLEAR_USER } from './redux/user/actions';
 import { fetchCartFromBackend, clearCart } from './redux/cart/actions';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-
-import CheckoutPage from './pages/CheckoutPage';
 
 function App() {
   const [sessionChecked, setSessionChecked] = useState(false);
@@ -78,9 +71,7 @@ function App() {
   const isLoggedIn = !!userDetails?.email;
   const isAdmin = userDetails?.isAdmin;
 
-  if (!sessionChecked) {
-    return <div>Loading...</div>;
-  }
+  if (!sessionChecked) return <div>Loading...</div>;
 
   return (
     <>
@@ -157,7 +148,9 @@ function App() {
             </Applayout>
           }
         />
+
         <Route path="/product/:id" element={<ProductDetailPage />} />
+
         <Route
           path="/about"
           element={
@@ -166,6 +159,7 @@ function App() {
             </Applayout>
           }
         />
+
         <Route
           path="/contact"
           element={
@@ -174,6 +168,7 @@ function App() {
             </Applayout>
           }
         />
+
         <Route
           path="/cart"
           element={
@@ -183,47 +178,47 @@ function App() {
           }
         />
 
-<Route
-  path="/checkout"
-  element={
-    isLoggedIn && !isAdmin ? (
-      <Applayout userDetails={userDetails} onLogout={handleLogout} sessionChecked={sessionChecked}>
-        <CheckoutPage />
-      </Applayout>
-    ) : (
-      <Navigate to="/login" replace />
-    )
-  }
-/>
+        {/* ✅ Razorpay Checkout Flow */}
+        <Route
+          path="/checkout/shipping"
+          element={
+            isLoggedIn ? (
+              <Applayout userDetails={userDetails} onLogout={handleLogout} sessionChecked={sessionChecked}>
+                <CheckoutShipping />
+              </Applayout>
+            ) : (
+              <Navigate to="/login" replace />
+            )
+          }
+        />
 
+        <Route
+          path="/checkout/payment"
+          element={
+            isLoggedIn ? (
+              <Applayout userDetails={userDetails} onLogout={handleLogout} sessionChecked={sessionChecked}>
+                <CheckoutPayment />
+              </Applayout>
+            ) : (
+              <Navigate to="/login" replace />
+            )
+          }
+        />
 
-<Route
-  path="/checkout/shipping"
-  element={
-    isLoggedIn && !isAdmin ? (
-      <Applayout userDetails={userDetails} onLogout={handleLogout} sessionChecked={sessionChecked}>
-        <CheckoutShipping />
-      </Applayout>
-    ) : (
-      <Navigate to="/login" replace />
-    )
-  }
-/>
-<Route
-  path="/checkout/payment"
-  element={
-    isLoggedIn && !isAdmin ? (
-      <Applayout userDetails={userDetails} onLogout={handleLogout} sessionChecked={sessionChecked}>
-        <CheckoutPayment />
-      </Applayout>
-    ) : (
-      <Navigate to="/login" replace />
-    )
-  }
-/>
+        <Route
+          path="/checkout-success"
+          element={
+            isLoggedIn ? (
+              <Applayout userDetails={userDetails} onLogout={handleLogout} sessionChecked={sessionChecked}>
+                <CheckoutSuccess />
+              </Applayout>
+            ) : (
+              <Navigate to="/login" replace />
+            )
+          }
+        />
 
-        
-
+        {/* 🔐 Admin Routes */}
         <Route
           path="/admin"
           element={

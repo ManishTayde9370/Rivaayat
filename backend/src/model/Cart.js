@@ -25,7 +25,7 @@ const cartItemSchema = new mongoose.Schema(
     },
   },
   {
-    _id: false, // Prevent automatic _id generation for subdocuments
+    _id: false,
   }
 );
 
@@ -36,15 +36,15 @@ const cartSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',
       required: true,
-      unique: true, // Ensure one cart per user
+      unique: true,
     },
     items: {
       type: [cartItemSchema],
-      default: [], // Default to empty array if no items
+      default: [],
     },
   },
   {
-    timestamps: true, // Automatically adds createdAt and updatedAt
+    timestamps: true,
   }
 );
 

@@ -7,27 +7,26 @@ const cookieName = 'token';
 const getTokenFromRequest = (req) => req.cookies?.[cookieName];
 
 // Utility: Verify and decode token
-const verifyToken = (token) => {
+const verifyTokenPayload = (token) => {
   try {
     const decoded = jwt.verify(token, secret);
+    const userId = decoded._id || decoded.id;
 
-    if (!decoded || !decoded._id) {
-      throw new Error('Invalid token payload');
+    if (!userId) {
+      throw new Error('Invalid token payload: missing user ID');
     }
 
-    return decoded;
+    return { _id: userId, ...decoded };
   } catch (error) {
     if (error.name === 'TokenExpiredError') {
       throw new Error('Session expired. Please log in again.');
-    } else {
-      throw new Error('Invalid or corrupted token');
     }
+    throw new Error('Invalid or corrupted token');
   }
 };
 
-// Middleware collection
 const authMiddleware = {
-  // ✅ Authenticated users only
+  // ✅ Middleware: Authenticated users only
   requireAuth: (req, res, next) => {
     const token = getTokenFromRequest(req);
 
@@ -39,8 +38,7 @@ const authMiddleware = {
     }
 
     try {
-      const user = verifyToken(token);
-      req.user = user;
+      req.user = verifyTokenPayload(token);
       next();
     } catch (error) {
       return res.status(401).json({
@@ -50,7 +48,7 @@ const authMiddleware = {
     }
   },
 
-  // ✅ Admins only
+  // ✅ Middleware: Admins only
   requireAdmin: (req, res, next) => {
     const token = getTokenFromRequest(req);
 
@@ -62,7 +60,8 @@ const authMiddleware = {
     }
 
     try {
-      const user = verifyToken(token);
+      const user = verifyTokenPayload(token);
+
       if (!user.isAdmin) {
         return res.status(403).json({
           success: false,
@@ -80,23 +79,22 @@ const authMiddleware = {
     }
   },
 
-  // ✅ Attach user if token exists (optional)
+  // ✅ Middleware: Optional user attachment
   optionalAuth: (req, res, next) => {
     const token = getTokenFromRequest(req);
 
     if (token) {
       try {
-        req.user = verifyToken(token);
-      } catch (error) {
-        // Token invalid, ignore silently
-        req.user = null;
+        req.user = verifyTokenPayload(token);
+      } catch (_) {
+        req.user = null; // silently ignore invalid tokens
       }
     }
 
     next();
   },
 
-  // ✅ Strict verifier with 403 for invalid token
+  // ✅ Middleware: Strict auth with 403 on invalid token
   verifyToken: (req, res, next) => {
     const token = getTokenFromRequest(req);
 
@@ -107,7 +105,7 @@ const authMiddleware = {
     }
 
     try {
-      req.user = verifyToken(token);
+      req.user = verifyTokenPayload(token);
       next();
     } catch (error) {
       return res.status(403).json({

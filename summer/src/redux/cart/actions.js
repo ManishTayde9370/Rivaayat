@@ -40,16 +40,46 @@ export const fetchCartFromBackend = () => async (dispatch) => {
   }
 };
 
+
 // 💾 Save cart to backend after cart updates
 export const persistCartToBackend = () => async (dispatch, getState) => {
   try {
-    const cartItems = getState().cart.items;
+    const rawCartItems = getState().cart.items;
+
+    // 🔧 Construct items with required fields
+    const cartItems = rawCartItems.map((item) => ({
+      productId: item.productId || item._id,
+      name: item.name,
+      price: item.price,
+      quantity: item.quantity,
+    }));
+
+    // ❗ Validate each item before sending to backend
+    const invalidItems = cartItems.filter(
+      (item) =>
+        !item.productId ||
+        typeof item.name !== 'string' ||
+        typeof item.price !== 'number' ||
+        typeof item.quantity !== 'number'
+    );
+
+    if (invalidItems.length > 0) {
+      console.warn('⚠️ Skipping save. Invalid cart items found:', invalidItems);
+      return;
+    }
+
+    // 🧪 Debug log
+    console.log('📤 Saving cart to backend:', cartItems);
+
+    // ✅ Save to backend
     await axios.put(
       `${serverEndpoint}/api/cart`,
       { items: cartItems },
       { withCredentials: true }
     );
+
   } catch (err) {
-    console.error('Error saving cart to backend:', err);
+    console.error('❌ Error saving cart to backend:', err);
   }
 };
+
