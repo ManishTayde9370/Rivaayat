@@ -34,7 +34,7 @@ function CheckoutPayment() {
     });
 
   const handlePayment = async () => {
-    
+
 
     if (totalAmount <= 0) {
       alert('Invalid total amount');
@@ -67,11 +67,20 @@ function CheckoutPayment() {
         order_id: order.id,
         handler: async function (response) {
           try {
+            // const formattedCartItems = cartItems.map(item => ({
+            //   product: item._id,
+            //   quantity: item.quantity,
+            //   price: item.price,
+            // }));
+            console.log('🛒 cartItems:', cartItems);
             const formattedCartItems = cartItems.map(item => ({
-              product: item._id,
-              quantity: item.quantity,
+              product: item.productId,
+              name: item.name,
               price: item.price,
+              quantity: item.quantity,
+              image: item.image || '',
             }));
+
 
             // 🔧 Replace with form data in future
             const shippingAddress = {

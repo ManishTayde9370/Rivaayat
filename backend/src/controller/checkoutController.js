@@ -101,11 +101,19 @@ exports.verifyPaymentAndPlaceOrder = async (req, res) => {
     }
 
     // 📦 Prepare order items
+    // const formattedItems = cartItems.map(item => ({
+    //   product: item.product, // must be ObjectId
+    //   quantity: item.quantity,
+    //   price: item.price,
+    // }));
     const formattedItems = cartItems.map(item => ({
-      product: item.product, // must be ObjectId
-      quantity: item.quantity,
+      product: item.product,
+      name: item.name,
       price: item.price,
+      quantity: item.quantity,
+      image: item.image || '',
     }));
+
 
     // 🧾 Create and save order
     const newOrder = new Order({
