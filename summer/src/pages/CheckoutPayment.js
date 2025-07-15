@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import axios from 'axios';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
@@ -8,8 +8,11 @@ import { serverEndpoint } from '../components/config';
 function CheckoutPayment() {
   const cartItems = useSelector((state) => state?.cart?.items || []);
   const user = useSelector((state) => state?.user?.user || null);
+  const shippingAddress = useSelector((state) => state.shipping?.address || null);
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const paymentSuccessRef = useRef(false);
+
   const [isLoading, setIsLoading] = useState(false);
   const [isRazorpayOpen, setIsRazorpayOpen] = useState(false);
 
@@ -19,7 +22,7 @@ function CheckoutPayment() {
   );
 
   useEffect(() => {
-    if (!cartItems.length) {
+    if (!cartItems.length && !paymentSuccessRef.current) {
       navigate('/cart');
     }
   }, [cartItems, navigate]);
@@ -34,13 +37,6 @@ function CheckoutPayment() {
     });
 
   const handlePayment = async () => {
-
-
-    if (totalAmount <= 0) {
-      alert('Invalid total amount');
-      return;
-    }
-
     setIsLoading(true);
 
     const loaded = await loadRazorpayScript();
@@ -51,7 +47,10 @@ function CheckoutPayment() {
     }
 
     try {
-      const { data: keyData } = await axios.get(`${serverEndpoint}/api/checkout/razorpay-key`);
+      const { data: keyData } = await axios.get(
+        `${serverEndpoint}/api/checkout/razorpay-key`
+      );
+
       const { data: order } = await axios.post(
         `${serverEndpoint}/api/checkout/create-order`,
         { amount: totalAmount },
@@ -67,27 +66,19 @@ function CheckoutPayment() {
         order_id: order.id,
         handler: async function (response) {
           try {
-            // const formattedCartItems = cartItems.map(item => ({
-            //   product: item._id,
-            //   quantity: item.quantity,
-            //   price: item.price,
-            // }));
-            console.log('🛒 cartItems:', cartItems);
-            const formattedCartItems = cartItems.map(item => ({
-              product: item.productId,
+            if (!shippingAddress?.address || !shippingAddress?.city) {
+              alert('Shipping address missing. Please go back and fill it.');
+              navigate('/checkout/shipping');
+              return;
+            }
+
+            const formattedCartItems = cartItems.map((item) => ({
+              productId: item.productId || item._id, // Ensure productId is always present
               name: item.name,
               price: item.price,
               quantity: item.quantity,
               image: item.image || '',
             }));
-
-
-            // 🔧 Replace with form data in future
-            const shippingAddress = {
-              address: '123 Main St',
-              city: 'Mumbai',
-              postalCode: '400001',
-            };
 
             const { data: result } = await axios.post(
               `${serverEndpoint}/api/checkout/verify-and-place-order`,
@@ -103,10 +94,16 @@ function CheckoutPayment() {
             );
 
             dispatch(clearCart());
+            paymentSuccessRef.current = true;
             navigate('/checkout-success', { state: { order: result.order } });
           } catch (error) {
-            console.error('Payment verification failed:', error.response?.data || error.message);
-            alert('Payment was successful, but verification failed. Please contact support.');
+            console.error(
+              'Payment verification failed:',
+              error.response?.data || error.message
+            );
+            alert(
+              'Payment was successful, but verification failed. Please contact support.'
+            );
           }
         },
         prefill: {

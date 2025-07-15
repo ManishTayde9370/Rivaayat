@@ -106,27 +106,53 @@ exports.verifyPaymentAndPlaceOrder = async (req, res) => {
     //   quantity: item.quantity,
     //   price: item.price,
     // }));
-    const formattedItems = cartItems.map(item => ({
-      product: item.product,
-      name: item.name,
-      price: item.price,
-      quantity: item.quantity,
-      image: item.image || '',
-    }));
+    console.log("🧾 Incoming cart items:", cartItems);
+
+const formattedItems = cartItems.map((item, index) => {
+  if (!item.productId && !item._id) {
+    console.warn(`❌ Item at index ${index} is missing productId/_id:`, item);
+  }
+
+  return {
+    productId: item.productId || item._id, // Ensure productId is always present
+    name: item.name,
+    price: item.price,
+    quantity: item.quantity,
+    image: item.image || '',
+  };
+});
+
 
 
     // 🧾 Create and save order
+    // const newOrder = new Order({
+    //   user: req.user._id.toString(),
+    //   items: formattedItems,
+    //   total: calculatedTotal,
+    //   amountPaid: calculatedTotal,
+    //   paymentId: razorpay_payment_id,
+    //   razorpayOrderId: razorpay_order_id,
+    //   shippingAddress,
+    //   status: 'Processing', // Must match enum in your Order schema
+    //   paymentStatus: 'Verified', // Must match enum
+    // });
+    console.log('✅ Formatted Items:', formattedItems);
+
     const newOrder = new Order({
       user: req.user._id.toString(),
       items: formattedItems,
-      total: calculatedTotal,
       amountPaid: calculatedTotal,
-      paymentId: razorpay_payment_id,
-      razorpayOrderId: razorpay_order_id,
+      paymentInfo: {
+        razorpay_order_id,
+        razorpay_payment_id,
+        razorpay_signature,
+      },
       shippingAddress,
-      status: 'Processing', // Must match enum in your Order schema
-      paymentStatus: 'Verified', // Must match enum
+      isPaid: true,
+      paidAt: new Date(),
+      status: 'Processing',
     });
+
 
     await newOrder.save();
 

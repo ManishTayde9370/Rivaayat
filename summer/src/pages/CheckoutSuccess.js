@@ -21,7 +21,7 @@ function CheckoutSuccess() {
       <div className="mt-4 card p-4 shadow-sm">
         <h4>Order Summary</h4>
         <p><strong>Order ID:</strong> {order._id}</p>
-        <p><strong>Total:</strong> ₹{order.totalAmount.toFixed(2)}</p>
+        <p><strong>Total:</strong> ₹{order.amountPaid.toFixed(2)}</p>
         <p><strong>Shipping to:</strong> {order.shippingAddress?.address}, {order.shippingAddress?.city} - {order.shippingAddress?.postalCode}</p>
 
         <h5 className="mt-4">Items:</h5>

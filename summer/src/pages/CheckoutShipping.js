@@ -1,28 +1,32 @@
 import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
-import { setShippingAddress } from '../redux/shipping/actions'; // ✅ Make sure it's "actions.js", not "action.js"
-
+import { setShippingAddress } from '../redux/shipping/actions';
 import { useNavigate } from 'react-router-dom';
 
 const CheckoutShipping = () => {
   const [address, setAddress] = useState('');
   const [city, setCity] = useState('');
+  const [postalCode, setPostalCode] = useState('');
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    // Optional: Basic validation
-    if (!address.trim() || !city.trim()) {
+    if (!address.trim() || !city.trim() || !postalCode.trim()) {
       alert('Please fill out all fields');
       return;
     }
 
-    // Dispatch the shipping address to Redux
-    dispatch(setShippingAddress({ address, city }));
+    // ✅ Include all fields expected by backend
+    dispatch(setShippingAddress({
+      address,
+      city,
+      postalCode,
+      state: 'Maharashtra',  // Hardcoded for now; can be made dynamic
+      country: 'India',
+    }));
 
-    // Navigate to payment step
     navigate('/checkout/payment');
   };
 
@@ -52,6 +56,19 @@ const CheckoutShipping = () => {
             value={city}
             onChange={(e) => setCity(e.target.value)}
             placeholder="City Name"
+            required
+          />
+        </div>
+
+        <div>
+          <label htmlFor="postalCode">Postal Code</label>
+          <input
+            id="postalCode"
+            type="text"
+            className="form-control"
+            value={postalCode}
+            onChange={(e) => setPostalCode(e.target.value)}
+            placeholder="400001"
             required
           />
         </div>
